@@ -6,6 +6,7 @@
 # Realizando alterações no git modificado usuario e email
 * comando git push
 * Comando git pull
+* Comando git Fetch
 <!---
 LeonardoMRey/LeonardoMRey is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
 You can click the Preview link to take a look at your changes.
