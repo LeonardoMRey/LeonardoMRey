@@ -11,10 +11,24 @@ interface BarChartProps {
   layout: 'horizontal' | 'vertical';
   barColor?: string;
   isCurrency?: boolean;
+  isPercentage?: boolean;
 }
 
-export const BarChart: React.FC<BarChartProps> = ({ title, data, dataKeyX, dataKeyY, barKey, layout, barColor = 'hsl(var(--primary))', isCurrency = false }) => {
+export const BarChart: React.FC<BarChartProps> = ({ title, data, dataKeyX, dataKeyY, barKey, layout, barColor = 'hsl(var(--primary))', isCurrency = false, isPercentage = false }) => {
   const isVertical = layout === 'vertical';
+
+  const formatTick = (value: any) => {
+    if (isCurrency) return formatCurrency(value as number);
+    if (isPercentage) return `${(value as number).toFixed(0)}%`;
+    return value;
+  };
+
+  const formatTooltip = (value: number) => {
+    if (isCurrency) return formatCurrency(value);
+    if (isPercentage) return `${value.toFixed(1)}%`;
+    return value.toLocaleString('pt-BR');
+  };
+
   return (
     <Card className="h-96 flex flex-col">
       <CardHeader>
@@ -26,17 +40,17 @@ export const BarChart: React.FC<BarChartProps> = ({ title, data, dataKeyX, dataK
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
             {isVertical ? (
               <>
-                <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={isCurrency ? (v) => formatCurrency(v as number) : undefined} />
+                <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={formatTick} />
                 <YAxis dataKey={dataKeyY} type="category" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} width={120} />
               </>
             ) : (
               <>
                 <XAxis dataKey={dataKeyX} stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} angle={-45} textAnchor="end" interval={0} />
-                <YAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={isCurrency ? (v) => formatCurrency(v as number) : undefined} />
+                <YAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={formatTick} />
               </>
             )}
             <Tooltip
-              formatter={(value: number) => [isCurrency ? formatCurrency(value) : value.toLocaleString('pt-BR'), barKey]}
+              formatter={(value: number) => [formatTooltip(value), barKey]}
               contentStyle={{
                 backgroundColor: 'hsl(var(--background))',
                 border: '1px solid hsl(var(--border))',
