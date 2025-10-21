@@ -81,7 +81,7 @@ export const Dashboard = ({ data }: DashboardProps) => {
         <KpiCard title="Lead Time Externo" value={`${processedMetrics.leadTimeExternoMedio} dias`} icon={Clock} iconColorClass="text-warning" />
       </div>
 
-      <div className="grid auto-rows-fr gap-4 md:gap-8 lg:grid-cols-3">
+      <div className="grid gap-4 md:gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <LineChart title="Evolução do Lead Time Total Médio" data={processedMetrics.leadTimeEvolucaoChartData} dataKeyX="month" lines={[{ dataKey: "Lead Time Médio", stroke: "hsl(var(--primary))", name: "Lead Time Médio" }]} />
         </div>
