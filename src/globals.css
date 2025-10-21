@@ -35,20 +35,19 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Cores MR Consult */
+    --petrol-blue: 195 53% 25%; /* ~ #1e5263 */
+    --matte-gold: 38 42% 60%; /* ~ #b59a6a */
+    --off-white: 48 33% 94%; /* ~ #f2f0ed */
+    --graphite-gray: 210 9% 31%; /* ~ #4a5059 */
   }
 
   .dark {

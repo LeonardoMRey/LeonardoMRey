@@ -62,6 +62,11 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Cores MR Consult
+        'petrol-blue': 'hsl(var(--petrol-blue))',
+        'matte-gold': 'hsl(var(--matte-gold))',
+        'off-white': 'hsl(var(--off-white))',
+        'graphite-gray': 'hsl(var(--graphite-gray))',
       },
       borderRadius: {
         lg: "var(--radius)",
