@@ -1,11 +1,12 @@
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { SortableContext, arrayMove } from "@dnd-kit/sortable";
+import { SortableContext } from "@dnd-kit/sortable";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Demand, DemandStatus, DemandStatusEnum } from "@/types";
 import KanbanColumn from "./KanbanColumn";
 import { useState, useEffect } from "react";
 import { showError, showSuccess } from "@/utils/toast";
+import { DemandDetailsDialog } from "../demands/DemandDetailsDialog";
 
 const fetchDemands = async (): Promise<Demand[]> => {
   const { data, error } = await supabase
@@ -37,6 +38,7 @@ const KanbanBoard = () => {
   });
 
   const [columns, setColumns] = useState<Map<DemandStatus, Demand[]>>(new Map());
+  const [selectedDemand, setSelectedDemand] = useState<Demand | null>(null);
 
   useEffect(() => {
     if (demands) {
@@ -73,12 +75,9 @@ const KanbanBoard = () => {
     if (!over || active.id === over.id) return;
 
     const activeId = active.id;
-    const overId = over.id;
+    const overContainer = over.data.current?.sortable.containerId || over.id;
 
-    const activeContainer = active.data.current?.sortable.containerId;
-    const overContainer = over.data.current?.sortable.containerId || overId;
-
-    if (activeContainer !== overContainer) {
+    if (active.data.current?.sortable.containerId !== overContainer) {
       mutation.mutate({ id: Number(activeId), status: overContainer as DemandStatus });
     }
   };
@@ -87,15 +86,29 @@ const KanbanBoard = () => {
   if (isError) return <div>Ocorreu um erro ao buscar as demandas.</div>;
 
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-      <div className="flex space-x-4 overflow-x-auto p-4">
-        <SortableContext items={Array.from(columns.keys())}>
-          {Array.from(columns.entries()).map(([status, demandsInColumn]) => (
-            <KanbanColumn key={status} status={status} demands={demandsInColumn} />
-          ))}
-        </SortableContext>
-      </div>
-    </DndContext>
+    <>
+      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+        <div className="flex space-x-4 overflow-x-auto p-4">
+          <SortableContext items={Array.from(columns.keys())}>
+            {Array.from(columns.entries()).map(([status, demandsInColumn]) => (
+              <KanbanColumn 
+                key={status} 
+                status={status} 
+                demands={demandsInColumn}
+                onCardClick={setSelectedDemand}
+              />
+            ))}
+          </SortableContext>
+        </div>
+      </DndContext>
+      {selectedDemand && (
+        <DemandDetailsDialog
+          demand={selectedDemand}
+          open={!!selectedDemand}
+          onOpenChange={() => setSelectedDemand(null)}
+        />
+      )}
+    </>
   );
 };
 

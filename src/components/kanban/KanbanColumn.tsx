@@ -6,9 +6,10 @@ import { useMemo } from "react";
 type KanbanColumnProps = {
   status: DemandStatus;
   demands: Demand[];
+  onCardClick: (demand: Demand) => void;
 };
 
-const KanbanColumn = ({ status, demands }: KanbanColumnProps) => {
+const KanbanColumn = ({ status, demands, onCardClick }: KanbanColumnProps) => {
   const { setNodeRef } = useSortable({ id: status });
   const demandIds = useMemo(() => demands.map((d) => d.id), [demands]);
 
@@ -23,7 +24,7 @@ const KanbanColumn = ({ status, demands }: KanbanColumnProps) => {
       <div className="h-full overflow-y-auto">
         <SortableContext items={demandIds}>
           {demands.map((demand) => (
-            <KanbanCard key={demand.id} demand={demand} />
+            <KanbanCard key={demand.id} demand={demand} onCardClick={onCardClick} />
           ))}
         </SortableContext>
       </div>

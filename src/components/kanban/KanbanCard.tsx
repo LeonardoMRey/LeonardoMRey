@@ -7,9 +7,10 @@ import { Badge } from "../ui/badge";
 
 type KanbanCardProps = {
   demand: Demand;
+  onCardClick: (demand: Demand) => void;
 };
 
-const KanbanCard = ({ demand }: KanbanCardProps) => {
+const KanbanCard = ({ demand, onCardClick }: KanbanCardProps) => {
   const {
     attributes,
     listeners,
@@ -29,7 +30,10 @@ const KanbanCard = ({ demand }: KanbanCardProps) => {
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <Card className="mb-4 bg-off-white border-matte-gold/20 hover:shadow-md transition-shadow">
+      <Card 
+        className="mb-4 bg-off-white border-matte-gold/20 hover:shadow-md transition-shadow cursor-pointer"
+        onClick={() => onCardClick(demand)}
+      >
         <CardHeader className="p-4">
           <CardTitle className="text-base text-petrol-blue">{demand.title}</CardTitle>
         </CardHeader>
