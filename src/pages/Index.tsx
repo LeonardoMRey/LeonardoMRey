@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Papa from "papaparse";
-import { SiengeData } from "@/types/sienge";
+import { Solicitacao, Compra } from "@/types/data";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { FileUpload } from "@/components/dashboard/FileUpload";
@@ -8,63 +8,83 @@ import { Dashboard } from "@/components/dashboard/Dashboard";
 import { Toaster } from "@/components/ui/sonner";
 import { showError } from "@/utils/toast";
 
-// Mapeamento das colunas do CSV para chaves mais amigáveis
-const COLUMN_MAPPING: { [key: string]: keyof SiengeData } = {
-  "Data da solicitação": "requestDate",
-  "Solicitante": "requester",
-  "Comprador": "responsible",
-  "Situação da solicitação": "stage",
-  "Situação do pedido": "status",
-  "Valor da nota": "value",
-  "Fornecedor": "supplier",
-  "Previsão de entrega": "deliveryDate",
-  "Nº da Solicitação": "requestNumber",
-  "Descrição do insumo": "itemDescription",
+// Mapeamento para o Relatório de Solicitações
+const SOLICITACAO_MAPPING: { [key: string]: keyof Solicitacao } = {
+  "Nº da solicitação": "requestNumber",
+  "Descrição insumo": "itemDescription",
+  "Situação": "status",
+  "Data previsão": "deliveryDate",
+  "Comprador": "buyer",
+  "Obra": "project",
+  "Quant. pendente": "pendingQuantity",
+  "Quant. atendida": "attendedQuantity",
+  "Data solicitação": "requestDate",
 };
 
-const parseValue = (value: string): number => {
+// Mapeamento para o Relatório de Compras
+const COMPRA_MAPPING: { [key: string]: keyof Compra } = {
+  "Nº do pedido": "orderNumber",
+  "Obra": "project",
+  "Comprador": "buyer",
+  "Fornecedor": "supplier",
+  "Status entrega": "deliveryStatus",
+  "Valor líquido entrega": "netValue",
+  "Data prevista": "deliveryDate",
+  "Quant. pendente": "pendingQuantity",
+  "Quant. entregue": "deliveredQuantity",
+};
+
+const parseNumber = (value: string): number => {
   if (!value || typeof value !== 'string') return 0;
-  const cleanedValue = value
-    .replace("R$", "")
-    .trim()
-    .replace(/\./g, "")
-    .replace(",", ".");
+  const cleanedValue = value.replace("R$", "").trim().replace(/\./g, "").replace(",", ".");
   return parseFloat(cleanedValue) || 0;
 };
 
 const IndexPage = () => {
-  const [data, setData] = useState<SiengeData[]>([]);
-  const [fileName, setFileName] = useState<string>("");
+  const [solicitacoes, setSolicitacoes] = useState<Solicitacao[]>([]);
+  const [compras, setCompras] = useState<Compra[]>([]);
+  const [solicitacoesFile, setSolicitacoesFile] = useState<string>("");
+  const [comprasFile, setComprasFile] = useState<string>("");
 
-  const handleFileUpload = (file: File) => {
-    setFileName(file.name);
+  const handleFileUpload = (file: File, type: 'solicitacoes' | 'compras') => {
+    const mapping = type === 'solicitacoes' ? SOLICITACAO_MAPPING : COMPRA_MAPPING;
+    const numberFields = type === 'solicitacoes' 
+      ? ['pendingQuantity', 'attendedQuantity'] 
+      : ['netValue', 'pendingQuantity', 'deliveredQuantity'];
+
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       delimiter: ";",
       complete: (results) => {
         if (results.errors.length > 0) {
-          showError("Erro ao processar o arquivo CSV. Verifique o formato.");
+          showError(`Erro ao processar o arquivo de ${type}. Verifique o formato.`);
           console.error("CSV Errors:", results.errors);
           return;
         }
         
         const mappedData = results.data.map((row: any) => {
-          const newRow: Partial<SiengeData> = {};
+          const newRow: Partial<Solicitacao & Compra> = {};
           for (const key in row) {
-            if (COLUMN_MAPPING[key]) {
-              const newKey = COLUMN_MAPPING[key];
-              if (newKey === 'value') {
-                (newRow as any)[newKey] = parseValue(row[key]);
+            if (mapping[key]) {
+              const newKey = mapping[key];
+              if (numberFields.includes(newKey)) {
+                (newRow as any)[newKey] = parseNumber(row[key]);
               } else {
                 (newRow as any)[newKey] = row[key];
               }
             }
           }
-          return newRow as SiengeData;
-        }).filter(row => row.requestNumber); // Filtra linhas que possam estar vazias
+          return newRow;
+        }).filter(row => Object.keys(row).length > 2);
 
-        setData(mappedData);
+        if (type === 'solicitacoes') {
+          setSolicitacoes(mappedData as Solicitacao[]);
+          setSolicitacoesFile(file.name);
+        } else {
+          setCompras(mappedData as Compra[]);
+          setComprasFile(file.name);
+        }
       },
       error: (error) => {
         showError("Ocorreu um erro inesperado ao ler o arquivo.");
@@ -74,18 +94,33 @@ const IndexPage = () => {
   };
 
   const handleReset = () => {
-    setData([]);
-    setFileName("");
+    setSolicitacoes([]);
+    setCompras([]);
+    setSolicitacoesFile("");
+    setComprasFile("");
   };
+
+  const showDashboard = solicitacoes.length > 0 && compras.length > 0;
 
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8">
-        {data.length === 0 ? (
-          <FileUpload onFileUpload={handleFileUpload} />
+        {showDashboard ? (
+          <Dashboard solicitacoesData={solicitacoes} comprasData={compras} onReset={handleReset} />
         ) : (
-          <Dashboard data={data} fileName={fileName} onReset={handleReset} />
+          <div className="grid md:grid-cols-2 gap-8 mt-10">
+            <FileUpload 
+              onFileUpload={(file) => handleFileUpload(file, 'solicitacoes')} 
+              title="Relatório de Solicitações"
+              fileName={solicitacoesFile}
+            />
+            <FileUpload 
+              onFileUpload={(file) => handleFileUpload(file, 'compras')} 
+              title="Relatório de Compras"
+              fileName={comprasFile}
+            />
+          </div>
         )}
       </main>
       <Footer />
