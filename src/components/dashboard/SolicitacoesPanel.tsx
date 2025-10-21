@@ -15,7 +15,7 @@ interface SolicitacoesPanelProps {
 export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitacoesData }) => {
   
   const metrics = useMemo(() => {
-    // Filtra solicitações que não foram autorizadas (Autorização = 'Não')
+    // 1. Filtrar solicitações não autorizadas (Autorização = 'Não')
     const authorizedSolicitacoes = solicitacoesData.filter(s => s.authorization?.toLowerCase() !== 'não');
     
     const total = authorizedSolicitacoes.length;
@@ -24,7 +24,6 @@ export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitaco
     let totalAprovadas = 0;
     let totalRejeitadas = 0;
     let totalConvertidas = 0;
-    let totalAbertas = 0;
     let totalDaysToApprove = 0;
     let approvedCount = 0;
     
@@ -35,35 +34,32 @@ export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitaco
       const statusLower = s.status?.toLowerCase() || '';
       
       // Lógica de Status
-      if (statusLower.includes('aprovada')) {
+      if (statusLower.includes('totalmente atendida') || statusLower.includes('parcialmente atendida')) {
+        // Consideramos 'Aprovada' se foi atendida (total ou parcial)
         totalAprovadas++;
         
-        // Cálculo de tempo médio de aprovação
+        // Cálculo de tempo médio de aprovação (usando requestDate e deliveryDate/data previsão)
         try {
           const requestDate = parse(s.requestDate, 'dd/MM/yyyy', new Date());
-          const approvalDate = parse(s.deliveryDate, 'dd/MM/yyyy', new Date());
+          const deliveryDate = parse(s.deliveryDate, 'dd/MM/yyyy', new Date());
           
-          // Só calcula se ambas as datas forem válidas e a aprovação for posterior à solicitação
-          if (isValid(requestDate) && isValid(approvalDate) && approvalDate > requestDate) {
-            totalDaysToApprove += differenceInDays(approvalDate, requestDate);
+          // Só calcula se ambas as datas forem válidas e a entrega/previsão for posterior à solicitação
+          if (isValid(requestDate) && isValid(deliveryDate) && deliveryDate >= requestDate) {
+            totalDaysToApprove += differenceInDays(deliveryDate, requestDate);
             approvedCount++;
           }
         } catch {}
       } else if (statusLower.includes('rejeitada') || statusLower.includes('cancelada')) {
         totalRejeitadas++;
-      } else if (statusLower.includes('atendida')) {
-        // Se estiver atendida, mas não aprovada explicitamente, conta como atendida (e não aberta)
-      } else {
-        totalAbertas++;
       }
-
+      
       if (s.isLinked) {
         totalConvertidas++;
         solicitacoesVinculadas.push(s);
       }
 
-      // Destaque: Solicitações com mais de 5 dias sem andamento
-      if (statusLower === 'solicitado' || statusLower === 'em análise') {
+      // Destaque: Solicitações ABERTAS (Solicitado, Em Análise, Pendente) com mais de 5 dias
+      if (statusLower === 'solicitado' || statusLower === 'em análise' || statusLower === 'pendente') {
         try {
           const requestDate = parse(s.requestDate, 'dd/MM/yyyy', new Date());
           if (isValid(requestDate) && differenceInDays(today, requestDate) > 5) {
@@ -72,12 +68,15 @@ export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitaco
         } catch {}
       }
     });
+    
+    // Total de Abertas = Total - Aprovadas (atendidas) - Rejeitadas
+    const totalAbertas = total - totalAprovadas - totalRejeitadas;
 
     const tempoMedioAprovacao = approvedCount > 0 ? (totalDaysToApprove / approvedCount).toFixed(1) : 'N/A';
 
     return {
       total,
-      totalAbertas,
+      totalAbertas: Math.max(0, totalAbertas), // Garante que não seja negativo
       totalAprovadas,
       totalRejeitadas,
       totalConvertidas,
@@ -94,19 +93,19 @@ export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitaco
       {/* KPIs */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
         <KpiCard 
-          title="Total de Solicitações" 
+          title="Total de Solicitações (Autorizadas)" 
           value={metrics.total} 
           icon={Package} 
           iconColorClass="text-primary"
         />
         <KpiCard 
-          title="Solicitações Abertas" 
+          title="Solicitações Abertas/Pendentes" 
           value={metrics.totalAbertas} 
           icon={Clock} 
           iconColorClass="text-yellow-500"
         />
         <KpiCard 
-          title="Solicitações Aprovadas" 
+          title="Solicitações Atendidas (Total/Parcial)" 
           value={metrics.totalAprovadas} 
           icon={CheckCircle} 
           iconColorClass="text-green-500"
@@ -118,7 +117,7 @@ export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitaco
           iconColorClass="text-accent"
         />
         <KpiCard 
-          title="Tempo Médio Aprovação (dias)" 
+          title="Tempo Médio Atendimento (dias)" 
           value={metrics.tempoMedioAprovacao} 
           icon={Timer} 
           iconColorClass="text-muted-foreground"
