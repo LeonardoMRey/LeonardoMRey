@@ -6,7 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { BarChart, PieChart, LineChart, FileText, RefreshCw } from "lucide-react";
+import { FileText, RefreshCw } from "lucide-react";
+import { StageBarChart } from "../charts/StageBarChart";
+import { StatusPieChart } from "../charts/StatusPieChart";
+import { TimelineLineChart } from "../charts/TimelineLineChart";
 
 interface DashboardProps {
   data: SiengeData[];
@@ -59,7 +62,6 @@ export const Dashboard = ({ data, fileName, onReset }: DashboardProps) => {
         </Button>
       </div>
 
-      {/* Indicadores e Gráficos (a serem implementados) */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -72,21 +74,16 @@ export const Dashboard = ({ data, fileName, onReset }: DashboardProps) => {
             </div>
           </CardContent>
         </Card>
-        <Card className="flex flex-col items-center justify-center bg-card/50 border-dashed">
-            <BarChart className="h-10 w-10 text-gray-500 mb-2" />
-            <p className="text-sm text-gray-500">Gráfico por Etapa (em breve)</p>
-        </Card>
-        <Card className="flex flex-col items-center justify-center bg-card/50 border-dashed">
-            <PieChart className="h-10 w-10 text-gray-500 mb-2" />
-            <p className="text-sm text-gray-500">Gráfico por Status (em breve)</p>
-        </Card>
-        <Card className="flex flex-col items-center justify-center bg-card/50 border-dashed">
-            <LineChart className="h-10 w-10 text-gray-500 mb-2" />
-            <p className="text-sm text-gray-500">Gráfico Temporal (em breve)</p>
-        </Card>
+        <div className="lg:col-span-3">
+          <TimelineLineChart data={data} />
+        </div>
       </div>
 
-      {/* Tabela Dinâmica */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <StageBarChart data={data} />
+        <StatusPieChart data={data} />
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Detalhes das Solicitações</CardTitle>
