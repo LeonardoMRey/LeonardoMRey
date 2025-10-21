@@ -26,7 +26,6 @@ export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitaco
     let totalAprovadas = 0;
     let totalRejeitadas = 0;
     let totalConvertidas = 0;
-    let totalAbertas = 0;
     let totalDaysToApprove = 0;
     let approvedCount = 0;
     
@@ -55,6 +54,7 @@ export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitaco
       } else if (statusLower.includes('rejeitada') || statusLower.includes('cancelada')) {
         totalRejeitadas++;
       } else {
+        // Se não foi atendida nem rejeitada, consideramos aberta/pendente
         totalAbertas++;
       }
       
@@ -64,7 +64,7 @@ export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitaco
       }
 
       // Destaque: Solicitações ABERTAS (Solicitado, Em Análise, Pendente) com mais de 5 dias
-      if (statusLower === 'solicitado' || statusLower === 'em análise' || statusLower === 'pendente') {
+      if (statusLower === 'solicitado' || statusLower === 'em análise' || statusLower.includes('pendente')) {
         try {
           const requestDate = parse(s.requestDate, 'dd/MM/yyyy', new Date());
           if (isValid(requestDate) && differenceInDays(today, requestDate) > 5) {

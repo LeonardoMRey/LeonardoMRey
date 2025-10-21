@@ -10,32 +10,38 @@ import { showError } from "@/utils/toast";
 
 // Mapeamento para o Relatório Unificado de Demandas
 const DEMANDA_MAPPING: { [key: string]: keyof Demanda } = {
-  "Nº da solicitação": "requestNumber",
-  "Descrição insumo": "itemDescription",
-  "Situação": "requestStatus",
-  "Data solicitação": "requestDate",
-  "Comprador": "buyer",
+  "Nº da Solicitação": "requestNumber",
+  "Descrição do insumo": "itemDescription",
+  "Situação da solicitação": "requestStatus",
+  "Data da solicitação": "requestDate",
+  "Comprador distribuído": "buyer",
   "Obra": "project",
-  "Autorização": "authorization",
+  "Situação autorização do item": "authorization",
   
   // Campos de Pedido/Compra
-  "Nº do pedido": "orderNumber",
+  "N° do Pedido": "orderNumber",
   "Fornecedor": "supplier",
-  "Status entrega": "deliveryStatus",
-  "Valor líquido entrega": "netValue",
-  "Data prevista": "deliveryDate",
-  "Quant. pendente (Pedido)": "pendingQuantity",
-  "Quant. entregue": "deliveredQuantity",
+  "Situação do pedido": "deliveryStatus",
+  "Valor da nota": "netValue", // Usando Valor da nota como valor líquido
+  "Previsão de entrega": "deliveryDate",
   
-  // Campos de Solicitação (Quantidades)
-  "Quant. pendente (Solicitação)": "requestPendingQuantity",
-  "Quant. atendida": "requestAttendedQuantity",
+  // Campos de Quantidade (Novos nomes)
+  "Quantidade solicitada": "requestedQuantity",
+  "Quantidade entregue": "deliveredQuantity",
+  "Saldo": "pendingQuantity",
 };
 
-const parseNumber = (value: string): number => {
+const parseNumber = (value: string | number | undefined): number => {
+  if (typeof value === 'number') return value;
   if (!value || typeof value !== 'string') return 0;
-  // Remove R$, pontos de milhar e substitui vírgula por ponto decimal
-  const cleanedValue = value.replace("R$", "").trim().replace(/\./g, "").replace(",", ".");
+  
+  // Remove R$, remove pontos de milhar e substitui vírgula por ponto decimal
+  const cleanedValue = value
+    .replace("R$", "")
+    .trim()
+    .replace(/\./g, "") // Remove separador de milhar (ponto)
+    .replace(",", "."); // Substitui separador decimal (vírgula) por ponto
+    
   const num = parseFloat(cleanedValue);
   return isNaN(num) ? 0 : num;
 };
@@ -47,10 +53,9 @@ const IndexPage = () => {
   const handleFileUpload = (file: File) => {
     const numberFields: (keyof Demanda)[] = [
       'netValue', 
-      'pendingQuantity', 
+      'requestedQuantity', 
       'deliveredQuantity', 
-      'requestPendingQuantity', 
-      'requestAttendedQuantity'
+      'pendingQuantity',
     ];
 
     Papa.parse(file, {
@@ -73,7 +78,12 @@ const IndexPage = () => {
               if (numberFields.includes(newKey)) {
                 (newRow as any)[newKey] = parseNumber(row[key]);
               } else {
-                (newRow as any)[newKey] = row[key];
+                // Mapeamento especial para Comprador (que pode vir como 'Nenhum')
+                if (newKey === 'buyer' && row[key] === 'Nenhum') {
+                    (newRow as any)[newKey] = '';
+                } else {
+                    (newRow as any)[newKey] = row[key];
+                }
               }
             }
           }

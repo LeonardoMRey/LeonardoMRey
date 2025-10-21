@@ -1,24 +1,23 @@
 export interface Demanda {
-  requestNumber: string; // Nº da solicitação
-  itemDescription: string; // Descrição insumo
-  requestStatus: string; // Situação
-  requestDate: string; // Data solicitação
-  buyer: string; // Comprador
+  requestNumber: string; // Nº da Solicitação
+  itemDescription: string; // Descrição do insumo
+  requestStatus: string; // Situação da solicitação
+  requestDate: string; // Data da solicitação
+  buyer: string; // Comprador (Comprador distribuído)
   project: string; // Obra
-  authorization: string; // Autorização (Sim/Não)
+  authorization: string; // Situação autorização do item
   
-  // Campos de Pedido/Compra (podem ser nulos se não houver pedido)
-  orderNumber?: string; // Nº do pedido
+  // Campos de Pedido/Compra
+  orderNumber?: string; // N° do Pedido
   supplier?: string; // Fornecedor
-  deliveryStatus?: string; // Status entrega
-  netValue?: number; // Valor líquido entrega
-  deliveryDate?: string; // Data prevista (entrega)
-  pendingQuantity?: number; // Quant. pendente (do pedido)
-  deliveredQuantity?: number; // Quant. entregue (do pedido)
+  deliveryStatus?: string; // Situação do pedido (Entrega)
+  netValue?: number; // Valor líquido entrega (Não existe no novo relatório, mas mantemos para compatibilidade futura ou usaremos Valor da nota)
+  deliveryDate?: string; // Previsão de entrega
   
-  // Campos de Solicitação (Quantidades)
-  requestPendingQuantity: number; // Quant. pendente (da solicitação)
-  requestAttendedQuantity: number; // Quant. atendida (da solicitação)
+  // Campos de Quantidade (Baseados no novo relatório)
+  requestedQuantity: number; // Quantidade solicitada
+  deliveredQuantity?: number; // Quantidade entregue
+  pendingQuantity?: number; // Saldo (Quant. pendente)
 }
 
 // Exportamos Demanda como o tipo principal

@@ -14,14 +14,14 @@ export const ExportMenu = ({ solicitacoesData, comprasData }: ExportMenuProps) =
 
   const solicitacaoOptions = {
     title: "Relatório de Solicitações",
-    headers: ["Nº Solicitação", "Insumo", "Status", "Data Solicitação", "Comprador", "Obra", "Qtd. Pendente (Solic.)", "Qtd. Atendida", "Autorização"],
-    keys: ["requestNumber", "itemDescription", "requestStatus", "requestDate", "buyer", "project", "requestPendingQuantity", "requestAttendedQuantity", "authorization"] as (keyof Demanda)[],
+    headers: ["Nº Solicitação", "Insumo", "Status", "Data Solicitação", "Comprador", "Obra", "Qtd. Solicitada", "Qtd. Entregue", "Autorização"],
+    keys: ["requestNumber", "itemDescription", "requestStatus", "requestDate", "buyer", "project", "requestedQuantity", "deliveredQuantity", "authorization"] as (keyof Demanda)[],
   };
 
   const compraOptions = {
     title: "Relatório de Compras",
-    headers: ["Nº Pedido", "Obra", "Comprador", "Fornecedor", "Status Entrega", "Valor Líquido", "Data Prevista", "Qtd. Pendente (Pedido)", "Qtd. Entregue"],
-    keys: ["orderNumber", "project", "buyer", "supplier", "deliveryStatus", "netValue", "deliveryDate", "pendingQuantity", "deliveredQuantity"] as (keyof Demanda)[],
+    headers: ["Nº Pedido", "Obra", "Comprador", "Fornecedor", "Status Entrega", "Valor Líquido", "Data Prevista", "Qtd. Entregue", "Saldo Pendente"],
+    keys: ["orderNumber", "project", "buyer", "supplier", "deliveryStatus", "netValue", "deliveryDate", "deliveredQuantity", "pendingQuantity"] as (keyof Demanda)[],
   };
 
   const handleExport = (type: 'solicitacao' | 'compra', format: 'csv' | 'pdf') => {
