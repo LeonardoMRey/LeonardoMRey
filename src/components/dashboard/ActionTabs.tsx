@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useMemo } from 'react';
 import { isDateBeforeToday, formatNumber } from '@/utils/data-processing';
 import { cn } from '@/lib/utils';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface ActionTabsProps {
     data: DemandaConsolidada[];
@@ -16,7 +17,7 @@ const TableGargaloInterno: React.FC<{ data: DemandaConsolidada[] }> = ({ data })
     }, [data]);
 
     return (
-        <ScrollArea className="h-[400px] w-full border rounded-lg">
+        <ScrollArea className="h-full w-full border rounded-lg">
             <Table>
                 <TableHeader className="sticky top-0 bg-card z-10">
                     <TableRow>
@@ -57,7 +58,7 @@ const TableGargaloExterno: React.FC<{ data: DemandaConsolidada[] }> = ({ data })
     }, [data]);
 
     return (
-        <ScrollArea className="h-[400px] w-full border rounded-lg">
+        <ScrollArea className="h-full w-full border rounded-lg">
             <Table>
                 <TableHeader className="sticky top-0 bg-card z-10">
                     <TableRow>
@@ -104,22 +105,26 @@ const TableGargaloExterno: React.FC<{ data: DemandaConsolidada[] }> = ({ data })
 
 export const ActionTabs: React.FC<ActionTabsProps> = ({ data }) => {
     return (
-        <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-foreground">Gestão de Gargalos</h2>
-            <Tabs defaultValue="interno">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="interno">A Fazer: Converter Solicitações (Gargalo Interno)</TabsTrigger>
-                    <TabsTrigger value="externo">A Fazer: Follow-up de Entregas (Gargalo Externo)</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="interno" className="mt-4">
-                    <TableGargaloInterno data={data} />
-                </TabsContent>
-                
-                <TabsContent value="externo" className="mt-4">
-                    <TableGargaloExterno data={data} />
-                </TabsContent>
-            </Tabs>
-        </section>
+        <Card className="h-full flex flex-col">
+            <CardHeader>
+                <CardTitle>Gestão de Gargalos</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-grow p-0 pb-6 px-6">
+                <Tabs defaultValue="interno" className="h-full flex flex-col">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="interno">Gargalo Interno</TabsTrigger>
+                        <TabsTrigger value="externo">Gargalo Externo</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="interno" className="mt-4 flex-grow">
+                        <TableGargaloInterno data={data} />
+                    </TabsContent>
+                    
+                    <TabsContent value="externo" className="mt-4 flex-grow">
+                        <TableGargaloExterno data={data} />
+                    </TabsContent>
+                </Tabs>
+            </CardContent>
+        </Card>
     );
 };

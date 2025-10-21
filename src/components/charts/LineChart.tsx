@@ -6,7 +6,6 @@ interface LineChartProps {
   data: any[];
   dataKeyX: string;
   lines: { dataKey: string; stroke: string; name: string }[];
-  height?: number;
 }
 
 export const LineChart: React.FC<LineChartProps> = ({ 
@@ -14,14 +13,13 @@ export const LineChart: React.FC<LineChartProps> = ({
   data, 
   dataKeyX, 
   lines, 
-  height = 300 
 }) => {
   return (
-    <Card className="h-full transition-all duration-300 hover:shadow-xl hover:border-primary/50">
+    <Card className="h-full flex flex-col transition-all duration-300 hover:shadow-xl hover:border-primary/50">
       <CardHeader>
         <CardTitle className="text-base font-medium">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="p-2 md:p-6" style={{ height: height }}>
+      <CardContent className="flex-grow p-2 md:p-6">
         <ResponsiveContainer width="100%" height="100%">
           <RechartsLineChart 
             data={data}

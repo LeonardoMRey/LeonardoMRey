@@ -9,7 +9,6 @@ interface BarChartProps {
   dataKeyY: string;
   barKey: string;
   layout: 'horizontal' | 'vertical';
-  height?: number;
   barColor?: string;
   isCurrency?: boolean;
 }
@@ -21,7 +20,6 @@ export const BarChart: React.FC<BarChartProps> = ({
   dataKeyY, 
   barKey, 
   layout, 
-  height = 300,
   barColor = 'hsl(var(--primary))',
   isCurrency = false,
 }) => {
@@ -29,11 +27,11 @@ export const BarChart: React.FC<BarChartProps> = ({
   const isVertical = layout === 'vertical';
   
   return (
-    <Card className="h-full transition-all duration-300 hover:shadow-xl hover:border-primary/50">
+    <Card className="h-full flex flex-col transition-all duration-300 hover:shadow-xl hover:border-primary/50">
       <CardHeader>
         <CardTitle className="text-base font-medium">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="p-2 md:p-6" style={{ height: height }}>
+      <CardContent className="flex-grow p-2 md:p-6">
         <ResponsiveContainer width="100%" height="100%">
           <RechartsBarChart 
             data={data} 
