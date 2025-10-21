@@ -16,7 +16,7 @@ interface BarChartProps {
 export const BarChart: React.FC<BarChartProps> = ({ title, data, dataKeyX, dataKeyY, barKey, layout, barColor = 'hsl(var(--primary))', isCurrency = false }) => {
   const isVertical = layout === 'vertical';
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="h-96 flex flex-col">
       <CardHeader>
         <CardTitle className="text-base font-medium">{title}</CardTitle>
       </CardHeader>

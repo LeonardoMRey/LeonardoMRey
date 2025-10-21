@@ -82,7 +82,7 @@ const TableGargaloExterno: React.FC<{ data: DemandaConsolidada[] }> = ({ data })
 
 export const ActionTabs: React.FC<ActionTabsProps> = ({ data }) => {
     return (
-        <Card className="h-full flex flex-col">
+        <Card className="h-96 flex flex-col">
             <CardHeader>
                 <CardTitle>Gestão de Gargalos</CardTitle>
             </CardHeader>

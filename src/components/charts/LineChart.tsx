@@ -10,7 +10,7 @@ interface LineChartProps {
 
 export const LineChart: React.FC<LineChartProps> = ({ title, data, dataKeyX, lines }) => {
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="h-96 flex flex-col">
       <CardHeader>
         <CardTitle className="text-base font-medium">{title}</CardTitle>
       </CardHeader>
