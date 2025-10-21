@@ -82,7 +82,7 @@ const IndexPage = () => {
   const clearFilters = () => { setDateRange(undefined); setSelectedProject(""); setSelectedBuyer(""); };
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[180px_1fr] lg:grid-cols-[200px_1fr]">
+    <div className="grid min-h-screen w-full md:grid-cols-[160px_1fr] lg:grid-cols-[180px_1fr]">
       <Sidebar />
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6">
