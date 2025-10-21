@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Demanda } from '@/types/data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { KpiCard } from './KpiCard';
-import { ShoppingCart, Truck, XCircle, AlertTriangle } from 'lucide-react';
+import { ShoppingCart, Truck, XCircle, AlertTriangle, Clock } from 'lucide-react';
 import { parse, isBefore, startOfToday, isValid } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
