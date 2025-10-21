@@ -78,7 +78,19 @@ const IndexPage = () => {
             }
           }
           return newRow;
-        }).filter(row => Object.keys(row).length > 5); // Filtra linhas com dados insuficientes
+        }).filter(row => {
+          // Uma linha é válida se tiver um número de solicitação OU um número de pedido.
+          const hasRequest = !!(row as Demanda).requestNumber;
+          const hasOrder = !!(row as Demanda).orderNumber;
+          return hasRequest || hasOrder;
+        });
+
+        if (mappedData.length === 0) {
+          showError("Nenhuma linha de dados válida foi encontrada no arquivo.");
+          setDemandas([]);
+          setDemandaFile("");
+          return;
+        }
 
         setDemandas(mappedData as Demanda[]);
         setDemandaFile(file.name);
