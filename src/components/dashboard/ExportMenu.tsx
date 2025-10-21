@@ -1,0 +1,68 @@
+import { FileText, FileDown, FileType2, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useExport } from '@/hooks/use-export';
+import { Solicitacao, Compra } from '@/types/data';
+
+interface ExportMenuProps {
+  solicitacoesData: Solicitacao[];
+  comprasData: Compra[];
+}
+
+export const ExportMenu = ({ solicitacoesData, comprasData }: ExportMenuProps) => {
+  const { exportToCSV, exportToPDF } = useExport();
+
+  const solicitacaoOptions = {
+    title: "Relatório de Solicitações",
+    headers: ["Nº Solicitação", "Insumo", "Status", "Data Previsão", "Comprador", "Obra", "Qtd. Pendente", "Qtd. Atendida", "Data Solicitação"],
+    keys: ["requestNumber", "itemDescription", "status", "deliveryDate", "buyer", "project", "pendingQuantity", "attendedQuantity", "requestDate"] as (keyof Solicitacao)[],
+  };
+
+  const compraOptions = {
+    title: "Relatório de Compras",
+    headers: ["Nº Pedido", "Obra", "Comprador", "Fornecedor", "Status Entrega", "Valor Líquido", "Data Prevista", "Qtd. Pendente", "Qtd. Entregue"],
+    keys: ["orderNumber", "project", "buyer", "supplier", "deliveryStatus", "netValue", "deliveryDate", "pendingQuantity", "deliveredQuantity"] as (keyof Compra)[],
+  };
+
+  const handleExport = (type: 'solicitacao' | 'compra', format: 'csv' | 'pdf') => {
+    const data = type === 'solicitacao' ? solicitacoesData : comprasData;
+    const options = type === 'solicitacao' ? solicitacaoOptions : compraOptions;
+    const filename = options.title.replace(/ /g, '_');
+
+    if (format === 'csv') {
+      exportToCSV(data, filename, options);
+    } else {
+      exportToPDF(data, filename, options);
+    }
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="secondary">
+          <Download className="mr-2 h-4 w-4" />
+          Exportar Relatórios
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-64 bg-card border-border">
+        <DropdownMenuLabel className="text-accent">Exportar Solicitações</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => handleExport('solicitacao', 'csv')}>
+          <FileType2 className="mr-2 h-4 w-4" /> CSV (Excel)
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleExport('solicitacao', 'pdf')}>
+          <FileText className="mr-2 h-4 w-4" /> PDF
+        </DropdownMenuItem>
+        
+        <DropdownMenuSeparator />
+
+        <DropdownMenuLabel className="text-accent">Exportar Compras</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => handleExport('compra', 'csv')}>
+          <FileType2 className="mr-2 h-4 w-4" /> CSV (Excel)
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleExport('compra', 'pdf')}>
+          <FileText className="mr-2 h-4 w-4" /> PDF
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};

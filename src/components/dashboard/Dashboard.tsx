@@ -9,6 +9,7 @@ import { SupplierPieChart } from "../charts/SupplierPieChart";
 import { TimelineLineChart } from "../charts/TimelineLineChart";
 import { BuyerStackedBarChart } from "../charts/BuyerStackedBarChart";
 import { SolicitacaoTable } from "./SolicitacaoTable";
+import { ExportMenu } from "./ExportMenu";
 
 interface DashboardProps {
   solicitacoesData: Solicitacao[];
@@ -56,10 +57,13 @@ export const Dashboard = ({ solicitacoesData, comprasData, onReset }: DashboardP
           <FileText className="h-4 w-4 text-accent" />
           <span>Dados carregados com sucesso.</span>
         </div>
-        <Button onClick={onReset} variant="outline">
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Carregar Novos Arquivos
-        </Button>
+        <div className="flex gap-4">
+          <ExportMenu solicitacoesData={solicitacoesData} comprasData={comprasData} />
+          <Button onClick={onReset} variant="outline">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Carregar Novos Arquivos
+          </Button>
+        </div>
       </div>
 
       {/* KPIs */}
