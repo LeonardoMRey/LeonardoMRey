@@ -1,25 +1,25 @@
-export interface Demanda {
+export interface DemandaConsolidada {
   requestNumber: string; // Nº da Solicitação
   itemDescription: string; // Descrição do insumo
   requestStatus: string; // Situação da solicitação
   requestDate: string; // Data da solicitação
-  buyer: string; // Comprador (Comprador distribuído)
+  
+  // Usaremos 'buyer' como Comprador e Solicitante (proxy)
+  buyer: string; // Comprador distribuído
+  
   project: string; // Obra
-  authorization: string; // Situação autorização do item
+  authorizationStatus: string; // Situação autorização do item
   
-  // Campos de Pedido/Compra
-  orderNumber?: string; // N° do Pedido
-  supplier?: string; // Fornecedor
-  deliveryStatus?: string; // Situação do pedido (Entrega)
-  netValue?: number; // Valor líquido entrega (Não existe no novo relatório, mas mantemos para compatibilidade futura ou usaremos Valor da nota)
-  deliveryDate?: string; // Previsão de entrega
+  orderNumber: string; // N° do Pedido
+  supplier: string; // Fornecedor
+  orderStatus: string; // Situação do pedido
+  deliveryForecast: string; // Previsão de entrega
   
-  // Campos de Quantidade (Baseados no novo relatório)
   requestedQuantity: number; // Quantidade solicitada
-  deliveredQuantity?: number; // Quantidade entregue
-  pendingQuantity?: number; // Saldo (Quant. pendente)
+  deliveredQuantity: number; // Quantidade entregue
+  pendingQuantity: number; // Saldo
+  invoiceValue: number; // Valor da nota
+  
+  // Data do pedido (Não presente no CSV anexo, mas mantido para compatibilidade)
+  orderDate?: string; 
 }
-
-// Exportamos Demanda como o tipo principal
-export type Solicitacao = Demanda;
-export type Compra = Demanda;

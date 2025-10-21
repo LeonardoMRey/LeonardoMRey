@@ -1,19 +1,18 @@
-import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { formatNumber } from '@/utils/data-processing';
 
 interface FunnelChartProps {
   data: { name: string; value: number }[];
 }
 
 export const FunnelChart: React.FC<FunnelChartProps> = ({ data }) => {
-  // Recharts doesn't have a native Funnel Chart, so we simulate it using a horizontal BarChart
-  // The data should be sorted from largest to smallest (top to bottom of the funnel)
+  const primaryColor = 'hsl(var(--primary))'; 
 
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="text-base font-medium">Pipeline de Compras (Funil)</CardTitle>
+        <CardTitle className="text-base font-medium">Funil de Compras</CardTitle>
       </CardHeader>
       <CardContent className="h-[300px] p-2 md:p-6">
         <ResponsiveContainer width="100%" height="100%">
@@ -33,15 +32,16 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({ data }) => {
               axisLine={false} 
             />
             <Tooltip
+              formatter={(value: number) => [formatNumber(value), 'Total']}
               contentStyle={{
-                backgroundColor: '#1C1F26',
+                backgroundColor: '#222',
                 border: '1px solid #444',
                 color: '#E0E0E0',
                 fontSize: '12px'
               }}
-              labelStyle={{ color: '#7C4DFF' }}
+              labelStyle={{ color: primaryColor }}
             />
-            <Bar dataKey="value" fill="#1976D2" name="Quantidade" radius={[0, 4, 4, 0]} />
+            <Bar dataKey="value" fill={primaryColor} name="Quantidade" radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
