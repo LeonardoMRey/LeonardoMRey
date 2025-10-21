@@ -3,11 +3,12 @@ export interface Solicitacao {
   itemDescription: string;
   status: string;
   deliveryDate: string;
-  buyer: string;
-  project: string;
+  buyer: string; // Responsável/Comprador
+  project: string; // Setor/Obra
   pendingQuantity: number;
   attendedQuantity: number;
   requestDate: string;
+  linkedOrderNumber?: string; // Novo campo para vincular ao Pedido
 }
 
 export interface Compra {

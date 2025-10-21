@@ -14,11 +14,12 @@ const SOLICITACAO_MAPPING: { [key: string]: keyof Solicitacao } = {
   "Descrição insumo": "itemDescription",
   "Situação": "status",
   "Data previsão": "deliveryDate",
-  "Comprador": "buyer",
-  "Obra": "project",
+  "Comprador": "buyer", // Mapeado como Responsável
+  "Obra": "project", // Mapeado como Setor
   "Quant. pendente": "pendingQuantity",
   "Quant. atendida": "attendedQuantity",
   "Data solicitação": "requestDate",
+  "Nº do pedido vinculado": "linkedOrderNumber", // Novo campo assumido
 };
 
 // Mapeamento para o Relatório de Compras
@@ -112,12 +113,12 @@ const IndexPage = () => {
           <div className="grid md:grid-cols-2 gap-8 mt-10">
             <FileUpload 
               onFileUpload={(file) => handleFileUpload(file, 'solicitacoes')} 
-              title="Relatório de Solicitações"
+              title="Relatório de Solicitações (Requisições Internas)"
               fileName={solicitacoesFile}
             />
             <FileUpload 
               onFileUpload={(file) => handleFileUpload(file, 'compras')} 
-              title="Relatório de Compras"
+              title="Relatório de Pedidos de Compras (Pedidos Emitidos)"
               fileName={comprasFile}
             />
           </div>

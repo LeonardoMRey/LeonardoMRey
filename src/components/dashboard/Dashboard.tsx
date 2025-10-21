@@ -1,15 +1,16 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Solicitacao, Compra } from "@/types/data";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Package, ShoppingCart, Timer, DollarSign, AlertTriangle, FileText } from "lucide-react";
-import { parse, isBefore, startOfToday } from 'date-fns';
-import { SolicitacaoStatusChart } from "../charts/SolicitacaoStatusChart";
-import { SupplierPieChart } from "../charts/SupplierPieChart";
-import { TimelineLineChart } from "../charts/TimelineLineChart";
-import { BuyerStackedBarChart } from "../charts/BuyerStackedBarChart";
-import { SolicitacaoTable } from "./SolicitacaoTable";
+import { RefreshCw, FileText, Filter } from "lucide-react";
 import { ExportMenu } from "./ExportMenu";
+import { SolicitacoesPanel } from "./SolicitacoesPanel";
+import { PedidosPanel } from "./PedidosPanel";
+import { PendenciasPanel } from "./PendenciasPanel";
+import { Separator } from "@/components/ui/separator";
+import { SidebarFilters } from "./SidebarFilters";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { SolicitacaoProcessada, ProcessedData } from "./types";
+import { parse } from 'date-fns';
 
 interface DashboardProps {
   solicitacoesData: Solicitacao[];
@@ -17,118 +18,154 @@ interface DashboardProps {
   onReset: () => void;
 }
 
-export const Dashboard = ({ solicitacoesData, comprasData, onReset }: DashboardProps) => {
+// Define o tipo para os filtros globais
+export interface DashboardFilters {
+  responsavel: string;
+  status: string;
+  fornecedor: string;
+  periodo: 'all' | '30d' | '90d' | '1y';
+}
 
-  const kpis = useMemo(() => {
-    const totalSolicitacoes = solicitacoesData.length;
-    const totalPedidos = new Set(comprasData.map(p => p.orderNumber)).size;
-    
-    // Solicitações pendentes de atendimento (Status diferente de 'Totalmente atendida')
-    const solicitacoesPendentes = solicitacoesData.filter(s => 
-      s.status && !s.status.toLowerCase().includes('atendida')
-    ).length;
-    
-    const valorTotalPedidos = comprasData.reduce((acc, curr) => acc + curr.netValue, 0);
-    
-    const today = startOfToday();
-    const pedidosAtrasados = comprasData.filter(c => {
-      try {
-        const dataPrevista = parse(c.deliveryDate, 'dd/MM/yyyy', new Date());
-        // Pedido está atrasado se a data prevista for anterior a hoje E o status não for 'Totalmente entregue'
-        return isBefore(dataPrevista, today) && c.deliveryStatus !== 'Totalmente entregue';
-      } catch {
-        return false;
-      }
-    }).length;
+export const Dashboard = ({ solicitacoesData, comprasData, onReset }: DashboardProps) => {
+  const [filters, setFilters] = useState<DashboardFilters>({
+    responsavel: 'all',
+    status: 'all',
+    fornecedor: 'all',
+    periodo: 'all',
+  });
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  // 1. Pré-processamento e Conexão de Dados
+  const processedData: ProcessedData = useMemo(() => {
+    // Mapeia pedidos para fácil lookup
+    const ordersMap = new Map(comprasData.map(c => [c.orderNumber, c]));
+
+    // Tenta vincular solicitações a pedidos
+    const solicitacoesWithLinks: SolicitacaoProcessada[] = solicitacoesData.map(s => {
+      const linkedOrder = s.linkedOrderNumber ? ordersMap.get(s.linkedOrderNumber) : undefined;
+      return {
+        ...s,
+        linkedOrder: linkedOrder,
+        isLinked: !!linkedOrder,
+      };
+    });
+
+    // Identifica pedidos sem solicitação de origem (emissão direta)
+    const linkedOrderNumbers = new Set(solicitacoesData.map(s => s.linkedOrderNumber).filter(Boolean));
+    const comprasSemSolicitacao = comprasData.filter(c => !linkedOrderNumbers.has(c.orderNumber));
 
     return {
-      totalSolicitacoes,
-      totalPedidos,
-      solicitacoesPendentes,
-      valorTotalPedidos,
-      pedidosAtrasados,
+      solicitacoes: solicitacoesWithLinks,
+      compras: comprasData,
+      comprasSemSolicitacao,
     };
   }, [solicitacoesData, comprasData]);
 
+  // 2. Aplicação de Filtros (Lógica de filtragem completa)
+  const filteredData = useMemo(() => {
+    const { responsavel, status, fornecedor, periodo } = filters;
+    const today = new Date();
+    
+    const filterByPeriod = (dateString: string | undefined): boolean => {
+      if (periodo === 'all' || !dateString) return true;
+      
+      try {
+        const date = parse(dateString, 'dd/MM/yyyy', new Date());
+        let cutoffDate = new Date();
+        
+        if (periodo === '30d') cutoffDate.setDate(today.getDate() - 30);
+        else if (periodo === '90d') cutoffDate.setDate(today.getDate() - 90);
+        else if (periodo === '1y') cutoffDate.setFullYear(today.getFullYear() - 1);
+        
+        return date >= cutoffDate;
+      } catch {
+        return false;
+      }
+    };
+
+    const filteredSolicitacoes = processedData.solicitacoes.filter(s => {
+      const responsavelMatch = responsavel === 'all' || s.buyer === responsavel;
+      const statusMatch = status === 'all' || s.status === status;
+      const periodMatch = filterByPeriod(s.requestDate);
+      
+      // Ignora filtro de fornecedor para solicitações
+      return responsavelMatch && statusMatch && periodMatch;
+    });
+
+    const filteredCompras = processedData.compras.filter(c => {
+      const responsavelMatch = responsavel === 'all' || c.buyer === responsavel;
+      const fornecedorMatch = fornecedor === 'all' || c.supplier === fornecedor;
+      const periodMatch = filterByPeriod(c.deliveryDate); // Usando data de entrega como proxy
+      
+      // Ignora filtro de status para compras
+      return responsavelMatch && fornecedorMatch && periodMatch;
+    });
+
+    // Recalcula compras sem solicitação dentro do filtro
+    const filteredLinkedOrderNumbers = new Set(filteredSolicitacoes.map(s => s.linkedOrderNumber).filter(Boolean));
+    const filteredComprasSemSolicitacao = filteredCompras.filter(c => !filteredLinkedOrderNumbers.has(c.orderNumber));
+
+
+    return {
+      solicitacoes: filteredSolicitacoes,
+      compras: filteredCompras,
+      comprasSemSolicitacao: filteredComprasSemSolicitacao,
+    };
+  }, [processedData, filters]);
+
+
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2 text-sm text-gray-400">
-          <FileText className="h-4 w-4 text-accent" />
-          <span>Dados carregados com sucesso.</span>
+    <div className="flex h-full min-h-[80vh]">
+      {/* Sidebar de Filtros */}
+      {isSidebarOpen && (
+        <div className="w-64 border-r border-border p-4 flex-shrink-0">
+          <SidebarFilters 
+            data={processedData} 
+            filters={filters} 
+            setFilters={setFilters} 
+            onClose={() => setIsSidebarOpen(false)}
+          />
         </div>
-        <div className="flex gap-4">
-          <ExportMenu solicitacoesData={solicitacoesData} comprasData={comprasData} />
-          <Button onClick={onReset} variant="outline">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Carregar Novos Arquivos
-          </Button>
-        </div>
-      </div>
+      )}
 
-      {/* KPIs */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Solicitações</CardTitle>
-            <Package className="h-5 w-5 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{kpis.totalSolicitacoes}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Pedidos</CardTitle>
-            <ShoppingCart className="h-5 w-5 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{kpis.totalPedidos}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Solicitações Pendentes</CardTitle>
-            <Timer className="h-5 w-5 text-yellow-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{kpis.solicitacoesPendentes}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Valor Total em Pedidos</CardTitle>
-            <DollarSign className="h-5 w-5 text-green-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
-              {kpis.valorTotalPedidos.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+      {/* Conteúdo Principal */}
+      <div className={`flex-grow p-4 transition-all duration-300 ${isSidebarOpen ? 'ml-0' : 'ml-0'}`}>
+        <ScrollArea className="h-[80vh] pr-4">
+          <div className="space-y-8">
+            {/* Header e Ações */}
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <FileText className="h-4 w-4 text-primary" />
+                <span>Dados carregados com sucesso.</span>
+              </div>
+              <div className="flex gap-4">
+                <Button variant="outline" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+                  <Filter className="mr-2 h-4 w-4" />
+                  {isSidebarOpen ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+                </Button>
+                <ExportMenu solicitacoesData={filteredData.solicitacoes} comprasData={filteredData.compras} />
+                <Button onClick={onReset} variant="outline">
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Carregar Novos Arquivos
+                </Button>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pedidos com Atraso</CardTitle>
-            <AlertTriangle className="h-5 w-5 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{kpis.pedidosAtrasados}</div>
-          </CardContent>
-        </Card>
-      </div>
 
-      {/* Gráficos de Linha do Tempo e Barras/Pizza */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-3">
-          <TimelineLineChart data={solicitacoesData} />
-        </div>
-        <SolicitacaoStatusChart data={solicitacoesData} />
-        <SupplierPieChart data={comprasData} />
-        <BuyerStackedBarChart data={comprasData} />
-      </div>
+            <Separator />
 
-      {/* Tabela Dinâmica */}
-      <SolicitacaoTable solicitacoesData={solicitacoesData} comprasData={comprasData} />
+            {/* Painéis */}
+            <SolicitacoesPanel solicitacoesData={filteredData.solicitacoes} />
+            
+            <PedidosPanel comprasData={filteredData.compras} />
+
+            <PendenciasPanel 
+              solicitacoesData={filteredData.solicitacoes} 
+              comprasData={filteredData.compras} 
+              comprasSemSolicitacao={filteredData.comprasSemSolicitacao}
+            />
+          </div>
+        </ScrollArea>
+      </div>
     </div>
   );
 };
