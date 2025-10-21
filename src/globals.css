@@ -7,45 +7,13 @@
     --background: 220 10% 8%; /* Graphite */
     --foreground: 210 20% 98%; /* Off-White */
 
-    --card: 220 10% 12%; /* Slightly lighter graphite for cards */
+    --card: 220 10% 14%; /* Aumentado o contraste do card */
     --card-foreground: 210 20% 98%;
 
     --popover: 220 10% 8%;
     --popover-foreground: 210 20% 98%;
 
     --primary: 190 80% 50%; /* Cyan/Teal - Main highlight */
-    --primary-foreground: 220 10% 8%;
-
-    --secondary: 220 10% 18%; /* Darker secondary background */
-    --secondary-foreground: 210 20% 98%;
-
-    --muted: 220 10% 18%;
-    --muted-foreground: 215 14% 70%;
-
-    --accent: 240 50% 60%; /* Secondary highlight color (e.g., Petrol Blue/Purple) */
-    --accent-foreground: 210 20% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 220 10% 25%;
-    --input: 220 10% 12%;
-    --ring: 190 80% 50%;
-
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 220 10% 8%;
-    --foreground: 210 20% 98%;
-
-    --card: 220 10% 12%;
-    --card-foreground: 210 20% 98%;
-
-    --popover: 220 10% 8%;
-    --popover-foreground: 210 20% 98%;
-
-    --primary: 190 80% 50%;
     --primary-foreground: 220 10% 8%;
 
     --secondary: 220 10% 18%;
@@ -57,9 +25,38 @@
     --accent: 240 50% 60%;
     --accent-foreground: 210 20% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 70% 55%; /* Vermelho mais vibrante */
     --destructive-foreground: 0 0% 98%;
 
+    --positive: 140 60% 50%; /* Verde para sucesso */
+    --warning: 45 90% 50%; /* Amarelo para atenção */
+
+    --border: 220 10% 25%;
+    --input: 220 10% 12%;
+    --ring: 190 80% 50%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 220 10% 8%;
+    --foreground: 210 20% 98%;
+    --card: 220 10% 14%;
+    --card-foreground: 210 20% 98%;
+    --popover: 220 10% 8%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 190 80% 50%;
+    --primary-foreground: 220 10% 8%;
+    --secondary: 220 10% 18%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 220 10% 18%;
+    --muted-foreground: 215 14% 70%;
+    --accent: 240 50% 60%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 98%;
+    --positive: 140 60% 50%;
+    --warning: 45 90% 50%;
     --border: 220 10% 25%;
     --input: 220 10% 12%;
     --ring: 190 80% 50%;

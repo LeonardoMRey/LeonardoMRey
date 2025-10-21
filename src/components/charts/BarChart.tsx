@@ -29,7 +29,7 @@ export const BarChart: React.FC<BarChartProps> = ({
   const isVertical = layout === 'vertical';
   
   return (
-    <Card className="h-full">
+    <Card className="h-full transition-all duration-300 hover:shadow-xl hover:border-primary/50">
       <CardHeader>
         <CardTitle className="text-base font-medium">{title}</CardTitle>
       </CardHeader>

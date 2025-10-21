@@ -12,7 +12,7 @@ interface KpiCardProps {
 
 export const KpiCard: React.FC<KpiCardProps> = ({ title, value, icon: Icon, iconColorClass = 'text-primary', description }) => {
   return (
-    <Card className="hover:shadow-lg transition-shadow duration-300">
+    <Card className="transition-all duration-300 hover:shadow-xl hover:border-primary/50">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
         <Icon className={cn("h-5 w-5", iconColorClass)} />
