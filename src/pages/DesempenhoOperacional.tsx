@@ -1,9 +1,9 @@
-import { Dashboard } from "@/components/dashboard/Dashboard";
+import { DesempenhoOperacionalDashboard } from "@/components/dashboards/DesempenhoOperacionalDashboard";
 import { useDashboardData } from "@/components/layout/Layout";
 
 const DesempenhoOperacional = () => {
   const { data } = useDashboardData();
-  return <Dashboard data={data} />;
+  return <DesempenhoOperacionalDashboard data={data} />;
 };
 
 export default DesempenhoOperacional;
