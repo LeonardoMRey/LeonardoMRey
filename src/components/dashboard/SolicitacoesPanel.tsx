@@ -26,6 +26,7 @@ export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitaco
     let totalAprovadas = 0;
     let totalRejeitadas = 0;
     let totalConvertidas = 0;
+    let totalAbertas = 0; // Variável inicializada
     let totalDaysToApprove = 0;
     let approvedCount = 0;
     
