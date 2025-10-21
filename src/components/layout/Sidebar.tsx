@@ -4,9 +4,6 @@ import {
   Database,
   HelpCircle,
   Settings,
-  User,
-  LogOut,
-  Briefcase,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,8 +26,7 @@ export const Sidebar = () => {
       <div className="flex h-full max-h-screen flex-col gap-2">
         <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
           <a href="/" className="flex items-center gap-2 font-semibold">
-            <Briefcase className="h-6 w-6 text-primary" />
-            <span className="">MR Consult</span>
+            <img src="/logo.png" alt="Newen Logo" className="h-8 object-contain" />
           </a>
         </div>
         <div className="flex-1">
@@ -42,12 +38,6 @@ export const Sidebar = () => {
             <SidebarLink icon={Database}>Databases</SidebarLink>
             <SidebarLink icon={HelpCircle}>Help</SidebarLink>
             <SidebarLink icon={Settings}>Settings</SidebarLink>
-          </nav>
-        </div>
-        <div className="mt-auto p-4 border-t">
-           <nav className="grid items-start gap-2 px-2 text-sm font-medium lg:px-4">
-            <SidebarLink icon={User}>Profile</SidebarLink>
-            <SidebarLink icon={LogOut}>Log Out</SidebarLink>
           </nav>
         </div>
       </div>

@@ -12,6 +12,7 @@ import { isWithinInterval } from "date-fns";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
+import { Footer } from "@/components/layout/Footer";
 
 const DEMANDA_MAPPING: { [key: string]: keyof DemandaConsolidada } = {
   "Nº da Solicitação": "requestNumber", "Descrição do insumo": "itemDescription", "Situação da solicitação": "requestStatus", "Data da solicitação": "requestDate", "Comprador distribuído": "buyer", "Obra": "project", "Situação autorização do item": "authorizationStatus", "N° do Pedido": "orderNumber", "Fornecedor": "supplier", "Situação do pedido": "orderStatus", "Valor da nota": "invoiceValue", "Previsão de entrega": "deliveryForecast", "Quantidade solicitada": "requestedQuantity", "Quantidade entregue": "deliveredQuantity", "Saldo": "pendingQuantity", "Data do pedido": "orderDate", "Data entrega na obra": "actualDeliveryDate",
@@ -81,7 +82,7 @@ const IndexPage = () => {
   const clearFilters = () => { setDateRange(undefined); setSelectedProject(""); setSelectedBuyer(""); };
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+    <div className="grid min-h-screen w-full md:grid-cols-[180px_1fr] lg:grid-cols-[200px_1fr]">
       <Sidebar />
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6">
@@ -119,6 +120,7 @@ const IndexPage = () => {
             </div>
           )}
         </main>
+        <Footer />
         <Toaster theme="dark" />
       </div>
     </div>
