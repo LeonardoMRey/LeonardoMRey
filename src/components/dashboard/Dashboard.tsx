@@ -81,19 +81,11 @@ export const Dashboard = ({ data }: DashboardProps) => {
         <KpiCard title="Lead Time Externo" value={`${processedMetrics.leadTimeExternoMedio} dias`} icon={Clock} iconColorClass="text-warning" />
       </div>
 
-      <div className="grid gap-4 md:gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <LineChart title="Evolução do Lead Time Total Médio" data={processedMetrics.leadTimeEvolucaoChartData} dataKeyX="month" lines={[{ dataKey: "Lead Time Médio", stroke: "hsl(var(--primary))", name: "Lead Time Médio" }]} />
-        </div>
-        <div className="lg:col-span-1">
-          <ActionTabs data={data} />
-        </div>
-        <div className="lg:col-span-2">
-          <BarChart title="Spend por Obra" data={processedMetrics.spendPorObraChartData} dataKeyX="name" dataKeyY="value" barKey="value" layout="horizontal" barColor="hsl(var(--primary))" isCurrency={true} />
-        </div>
-        <div className="lg:col-span-1">
-          <BarChart title="Top 10 Fornecedores com Atraso" data={processedMetrics.atrasosPorFornecedorChartData} dataKeyX="value" dataKeyY="name" barKey="value" layout="vertical" barColor="hsl(var(--destructive))" />
-        </div>
+      <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
+        <LineChart title="Evolução do Lead Time Total Médio" data={processedMetrics.leadTimeEvolucaoChartData} dataKeyX="month" lines={[{ dataKey: "Lead Time Médio", stroke: "hsl(var(--primary))", name: "Lead Time Médio" }]} />
+        <ActionTabs data={data} />
+        <BarChart title="Spend por Obra" data={processedMetrics.spendPorObraChartData} dataKeyX="name" dataKeyY="value" barKey="value" layout="horizontal" barColor="hsl(var(--primary))" isCurrency={true} />
+        <BarChart title="Top 10 Fornecedores com Atraso" data={processedMetrics.atrasosPorFornecedorChartData} dataKeyX="value" dataKeyY="name" barKey="value" layout="vertical" barColor="hsl(var(--destructive))" />
       </div>
     </div>
   );

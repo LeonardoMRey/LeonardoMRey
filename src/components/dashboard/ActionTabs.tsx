@@ -92,11 +92,15 @@ export const ActionTabs: React.FC<ActionTabsProps> = ({ data }) => {
                         <TabsTrigger value="interno">Gargalo Interno</TabsTrigger>
                         <TabsTrigger value="externo">Gargalo Externo</TabsTrigger>
                     </TabsList>
-                    <TabsContent value="interno" className="mt-4 flex-grow min-h-0">
-                        <TableGargaloInterno data={data} />
+                    <TabsContent value="interno" className="mt-4 flex-grow relative">
+                        <div className="absolute inset-0">
+                           <TableGargaloInterno data={data} />
+                        </div>
                     </TabsContent>
-                    <TabsContent value="externo" className="mt-4 flex-grow min-h-0">
-                        <TableGargaloExterno data={data} />
+                    <TabsContent value="externo" className="mt-4 flex-grow relative">
+                         <div className="absolute inset-0">
+                           <TableGargaloExterno data={data} />
+                        </div>
                     </TabsContent>
                 </Tabs>
             </CardContent>
