@@ -20,6 +20,7 @@ const SOLICITACAO_MAPPING: { [key: string]: keyof Solicitacao } = {
   "Quant. atendida": "attendedQuantity",
   "Data solicitação": "requestDate",
   "Nº do pedido vinculado": "linkedOrderNumber", // Novo campo assumido
+  "Autorização": "authorization", // Novo campo
 };
 
 // Mapeamento para o Relatório de Compras

@@ -9,6 +9,7 @@ export interface Solicitacao {
   attendedQuantity: number;
   requestDate: string;
   linkedOrderNumber?: string; // Novo campo para vincular ao Pedido
+  authorization?: string; // Novo campo para Autorização (Sim/Não)
 }
 
 export interface Compra {

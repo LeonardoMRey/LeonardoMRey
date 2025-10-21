@@ -15,28 +15,35 @@ interface SolicitacoesPanelProps {
 export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitacoesData }) => {
   
   const metrics = useMemo(() => {
-    const total = solicitacoesData.length;
+    // Filtra solicitações que não foram autorizadas (Autorização = 'Não')
+    const authorizedSolicitacoes = solicitacoesData.filter(s => s.authorization?.toLowerCase() !== 'não');
+    
+    const total = authorizedSolicitacoes.length;
     const today = startOfToday();
     
     let totalAprovadas = 0;
     let totalRejeitadas = 0;
     let totalConvertidas = 0;
     let totalAbertas = 0;
-    let totalAtendidas = 0;
     let totalDaysToApprove = 0;
     let approvedCount = 0;
     
     const solicitacoesPendentesAtrasadas: SolicitacaoProcessada[] = [];
     const solicitacoesVinculadas: SolicitacaoProcessada[] = [];
 
-    solicitacoesData.forEach(s => {
+    authorizedSolicitacoes.forEach(s => {
       const statusLower = s.status?.toLowerCase() || '';
       
+      // Lógica de Status
       if (statusLower.includes('aprovada')) {
         totalAprovadas++;
+        
+        // Cálculo de tempo médio de aprovação
         try {
           const requestDate = parse(s.requestDate, 'dd/MM/yyyy', new Date());
           const approvalDate = parse(s.deliveryDate, 'dd/MM/yyyy', new Date());
+          
+          // Só calcula se ambas as datas forem válidas e a aprovação for posterior à solicitação
           if (isValid(requestDate) && isValid(approvalDate) && approvalDate > requestDate) {
             totalDaysToApprove += differenceInDays(approvalDate, requestDate);
             approvedCount++;
@@ -45,7 +52,7 @@ export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitaco
       } else if (statusLower.includes('rejeitada') || statusLower.includes('cancelada')) {
         totalRejeitadas++;
       } else if (statusLower.includes('atendida')) {
-        totalAtendidas++;
+        // Se estiver atendida, mas não aprovada explicitamente, conta como atendida (e não aberta)
       } else {
         totalAbertas++;
       }
