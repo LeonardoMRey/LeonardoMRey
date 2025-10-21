@@ -93,29 +93,45 @@ export const Dashboard = ({ data }: DashboardProps) => {
 
   return (
     <ScrollArea className="h-[calc(100vh-200px)] pr-4">
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <div className="flex flex-col gap-8">
         
-        {/* Coluna Esquerda: Visão Geral */}
-        <div className="lg:col-span-3 flex flex-col gap-8">
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        {/* Seção 1: KPIs */}
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+          <div className="md:col-span-2">
             <KpiCard title="Lead Time Total Médio" value={`${processedMetrics.leadTimeTotalMedio} dias`} icon={TrendingUp} iconColorClass="text-warning" description="Ciclo: Solicitação -> Entrega." />
+          </div>
+          <div className="md:col-span-2">
             <KpiCard title="Entrega no Prazo (OTD)" value={`${processedMetrics.otdRate}%`} icon={Target} iconColorClass="text-positive" description="Pedidos entregues até a data prevista." />
+          </div>
+          <div className="md:col-span-2">
             <KpiCard title="Taxa de Atendimento (Fill Rate)" value={`${processedMetrics.fillRate}%`} icon={CheckCircle} iconColorClass="text-positive" description="% de pedidos 'Totalmente Entregue'." />
+          </div>
+          <div className="md:col-span-3">
             <KpiCard title="Lead Time Interno Médio" value={`${processedMetrics.leadTimeInternoMedio} dias`} icon={Clock} iconColorClass="text-warning" description="Eficiência: Solicitação -> Pedido." />
+          </div>
+          <div className="md:col-span-3">
             <KpiCard title="Lead Time Externo Médio" value={`${processedMetrics.leadTimeExternoMedio} dias`} icon={Clock} iconColorClass="text-warning" description="Fornecedor: Pedido -> Entrega." />
           </div>
-          <LineChart
-            title="Evolução do Lead Time Total Médio (por Mês)"
-            data={processedMetrics.leadTimeEvolucaoChartData}
-            dataKeyX="month"
-            lines={[{ dataKey: "Lead Time Médio", stroke: "hsl(var(--primary))", name: "Lead Time Médio" }]}
-            height={350}
-          />
         </div>
 
-        {/* Coluna Direita: Análise e Ação */}
-        <div className="lg:col-span-2 flex flex-col gap-8">
-          <ActionTabs data={data} />
+        {/* Seção 2: Análise Principal e Ações */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <LineChart
+              title="Evolução do Lead Time Total Médio (por Mês)"
+              data={processedMetrics.leadTimeEvolucaoChartData}
+              dataKeyX="month"
+              lines={[{ dataKey: "Lead Time Médio", stroke: "hsl(var(--primary))", name: "Lead Time Médio" }]}
+              height={400}
+            />
+          </div>
+          <div className="lg:col-span-1">
+            <ActionTabs data={data} />
+          </div>
+        </div>
+
+        {/* Seção 3: Análises de Suporte */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <BarChart title="Spend por Obra" data={processedMetrics.spendPorObraChartData} dataKeyX="name" dataKeyY="value" barKey="value" layout="horizontal" height={350} barColor="hsl(var(--primary))" isCurrency={true} />
           <BarChart title="Top 10 Fornecedores com Atraso" data={processedMetrics.atrasosPorFornecedorChartData} dataKeyX="value" dataKeyY="name" barKey="value" layout="vertical" height={350} barColor="hsl(var(--destructive))" />
         </div>
