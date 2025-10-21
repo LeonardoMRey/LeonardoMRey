@@ -5,10 +5,10 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { DashboardFilters } from './Dashboard';
-import { ProcessedData } from './types';
+import { DemandaProcessada } from './types';
 
 interface SidebarFiltersProps {
-  data: ProcessedData;
+  data: { demandas: DemandaProcessada[] }; // Recebe a lista unificada
   filters: DashboardFilters;
   setFilters: React.Dispatch<React.SetStateAction<DashboardFilters>>;
   onClose: () => void;
@@ -21,12 +21,10 @@ export const SidebarFilters: React.FC<SidebarFiltersProps> = ({ data, filters, s
     const statuses = new Set<string>();
     const fornecedores = new Set<string>();
 
-    data.solicitacoes.forEach(s => {
-      if (s.buyer) responsaveis.add(s.buyer);
-      if (s.status) statuses.add(s.status);
-    });
-    data.compras.forEach(c => {
-      if (c.supplier) fornecedores.add(c.supplier);
+    data.demandas.forEach(d => {
+      if (d.buyer) responsaveis.add(d.buyer);
+      if (d.requestStatus) statuses.add(d.requestStatus);
+      if (d.supplier) fornecedores.add(d.supplier);
     });
 
     return {

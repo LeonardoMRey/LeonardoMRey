@@ -1,31 +1,34 @@
 import { useMemo } from 'react';
-import { Compra } from '@/types/data';
+import { Demanda } from '@/types/data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { KpiCard } from './KpiCard';
-import { ShoppingCart, Truck, Clock, XCircle, AlertTriangle } from 'lucide-react';
+import { ShoppingCart, Truck, XCircle, AlertTriangle } from 'lucide-react';
 import { parse, isBefore, startOfToday, isValid } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface PedidosPanelProps {
-  comprasData: Compra[];
+  comprasData: Demanda[];
 }
 
 export const PedidosPanel: React.FC<PedidosPanelProps> = ({ comprasData }) => {
   
   const metrics = useMemo(() => {
-    const totalPedidos = new Set(comprasData.map(c => c.orderNumber)).size;
+    // Filtra apenas demandas que são pedidos (têm orderNumber)
+    const pedidos = comprasData.filter(d => !!d.orderNumber);
+    
+    const totalPedidos = new Set(pedidos.map(c => c.orderNumber)).size;
     
     let totalEntregues = 0;
     let totalAtraso = 0;
     let totalCancelados = 0;
     
-    const pedidosAtrasados: Compra[] = [];
-    const pedidosAguardandoEntrega: Compra[] = [];
+    const pedidosAtrasados: Demanda[] = [];
+    const pedidosAguardandoEntrega: Demanda[] = [];
     const today = startOfToday();
 
-    comprasData.forEach(c => {
+    pedidos.forEach(c => {
       const statusLower = c.deliveryStatus?.toLowerCase() || '';
       
       if (statusLower.includes('entregue')) {
@@ -36,7 +39,7 @@ export const PedidosPanel: React.FC<PedidosPanelProps> = ({ comprasData }) => {
 
       // Destaque: Pedidos com status "aguardando entrega" e data prevista ultrapassada.
       try {
-        const dataPrevista = parse(c.deliveryDate, 'dd/MM/yyyy', new Date());
+        const dataPrevista = parse(c.deliveryDate || '', 'dd/MM/yyyy', new Date());
         
         if (isValid(dataPrevista) && isBefore(dataPrevista, today) && !statusLower.includes('entregue') && !statusLower.includes('cancelado')) {
           totalAtraso++;

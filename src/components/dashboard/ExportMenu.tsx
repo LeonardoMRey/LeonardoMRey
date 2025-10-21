@@ -2,11 +2,11 @@ import { FileText, FileDown, FileType2, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useExport } from '@/hooks/use-export';
-import { Solicitacao, Compra } from '@/types/data';
+import { Demanda } from '@/types/data';
 
 interface ExportMenuProps {
-  solicitacoesData: Solicitacao[];
-  comprasData: Compra[];
+  solicitacoesData: Demanda[];
+  comprasData: Demanda[];
 }
 
 export const ExportMenu = ({ solicitacoesData, comprasData }: ExportMenuProps) => {
@@ -14,14 +14,14 @@ export const ExportMenu = ({ solicitacoesData, comprasData }: ExportMenuProps) =
 
   const solicitacaoOptions = {
     title: "Relatório de Solicitações",
-    headers: ["Nº Solicitação", "Insumo", "Status", "Data Previsão", "Comprador", "Obra", "Qtd. Pendente", "Qtd. Atendida", "Data Solicitação"],
-    keys: ["requestNumber", "itemDescription", "status", "deliveryDate", "buyer", "project", "pendingQuantity", "attendedQuantity", "requestDate"] as (keyof Solicitacao)[],
+    headers: ["Nº Solicitação", "Insumo", "Status", "Data Solicitação", "Comprador", "Obra", "Qtd. Pendente (Solic.)", "Qtd. Atendida", "Autorização"],
+    keys: ["requestNumber", "itemDescription", "requestStatus", "requestDate", "buyer", "project", "requestPendingQuantity", "requestAttendedQuantity", "authorization"] as (keyof Demanda)[],
   };
 
   const compraOptions = {
     title: "Relatório de Compras",
-    headers: ["Nº Pedido", "Obra", "Comprador", "Fornecedor", "Status Entrega", "Valor Líquido", "Data Prevista", "Qtd. Pendente", "Qtd. Entregue"],
-    keys: ["orderNumber", "project", "buyer", "supplier", "deliveryStatus", "netValue", "deliveryDate", "pendingQuantity", "deliveredQuantity"] as (keyof Compra)[],
+    headers: ["Nº Pedido", "Obra", "Comprador", "Fornecedor", "Status Entrega", "Valor Líquido", "Data Prevista", "Qtd. Pendente (Pedido)", "Qtd. Entregue"],
+    keys: ["orderNumber", "project", "buyer", "supplier", "deliveryStatus", "netValue", "deliveryDate", "pendingQuantity", "deliveredQuantity"] as (keyof Demanda)[],
   };
 
   const handleExport = (type: 'solicitacao' | 'compra', format: 'csv' | 'pdf') => {

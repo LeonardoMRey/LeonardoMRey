@@ -1,13 +1,11 @@
-import { Solicitacao, Compra } from '@/types/data';
+import { Demanda } from '@/types/data';
 
-// Estende Solicitacao para incluir o link processado
-export interface SolicitacaoProcessada extends Solicitacao {
-  linkedOrder?: Compra;
-  isLinked: boolean;
+// DemandaProcessada é a Demanda base, não precisamos de SolicitacaoProcessada separada
+export interface DemandaProcessada extends Demanda {
+  isLinked: boolean; // Indica se a demanda tem um pedido vinculado (orderNumber preenchido)
 }
 
 export interface ProcessedData {
-  solicitacoes: SolicitacaoProcessada[];
-  compras: Compra[];
-  comprasSemSolicitacao: Compra[];
+  demandas: DemandaProcessada[];
+  // Não precisamos mais de listas separadas de solicitacoes e compras
 }

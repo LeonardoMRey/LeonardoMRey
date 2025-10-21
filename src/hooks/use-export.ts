@@ -1,14 +1,14 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { Solicitacao, Compra } from '@/types/data';
+import { Demanda } from '@/types/data';
 import { showSuccess, showError } from '@/utils/toast';
 
-type ExportableData = Solicitacao[] | Compra[];
+type ExportableData = Demanda[];
 
 interface ExportOptions {
   title: string;
   headers: string[];
-  keys: (keyof Solicitacao | keyof Compra)[];
+  keys: (keyof Demanda)[];
 }
 
 export const useExport = () => {

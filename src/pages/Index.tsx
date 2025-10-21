@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Papa from "papaparse";
-import { Solicitacao, Compra } from "@/types/data";
+import { Demanda } from "@/types/data";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { FileUpload } from "@/components/dashboard/FileUpload";
@@ -8,52 +8,50 @@ import { Dashboard } from "@/components/dashboard/Dashboard";
 import { Toaster } from "@/components/ui/sonner";
 import { showError } from "@/utils/toast";
 
-// Mapeamento para o Relatório de Solicitações
-const SOLICITACAO_MAPPING: { [key: string]: keyof Solicitacao } = {
+// Mapeamento para o Relatório Unificado de Demandas
+const DEMANDA_MAPPING: { [key: string]: keyof Demanda } = {
   "Nº da solicitação": "requestNumber",
   "Descrição insumo": "itemDescription",
-  "Situação": "status",
-  "Data previsão": "deliveryDate",
-  "Comprador": "buyer", // Mapeado como Responsável
-  "Obra": "project", // Mapeado como Setor
-  "Quant. pendente": "pendingQuantity",
-  "Quant. atendida": "attendedQuantity",
+  "Situação": "requestStatus",
   "Data solicitação": "requestDate",
-  "Nº do pedido vinculado": "linkedOrderNumber", // Novo campo assumido
-  "Autorização": "authorization", // Novo campo
-};
-
-// Mapeamento para o Relatório de Compras
-const COMPRA_MAPPING: { [key: string]: keyof Compra } = {
-  "Nº do pedido": "orderNumber",
-  "Obra": "project",
   "Comprador": "buyer",
+  "Obra": "project",
+  "Autorização": "authorization",
+  
+  // Campos de Pedido/Compra
+  "Nº do pedido": "orderNumber",
   "Fornecedor": "supplier",
   "Status entrega": "deliveryStatus",
   "Valor líquido entrega": "netValue",
   "Data prevista": "deliveryDate",
-  "Quant. pendente": "pendingQuantity",
+  "Quant. pendente (Pedido)": "pendingQuantity",
   "Quant. entregue": "deliveredQuantity",
+  
+  // Campos de Solicitação (Quantidades)
+  "Quant. pendente (Solicitação)": "requestPendingQuantity",
+  "Quant. atendida": "requestAttendedQuantity",
 };
 
 const parseNumber = (value: string): number => {
   if (!value || typeof value !== 'string') return 0;
+  // Remove R$, pontos de milhar e substitui vírgula por ponto decimal
   const cleanedValue = value.replace("R$", "").trim().replace(/\./g, "").replace(",", ".");
   const num = parseFloat(cleanedValue);
   return isNaN(num) ? 0 : num;
 };
 
 const IndexPage = () => {
-  const [solicitacoes, setSolicitacoes] = useState<Solicitacao[]>([]);
-  const [compras, setCompras] = useState<Compra[]>([]);
-  const [solicitacoesFile, setSolicitacoesFile] = useState<string>("");
-  const [comprasFile, setComprasFile] = useState<string>("");
+  const [demandas, setDemandas] = useState<Demanda[]>([]);
+  const [demandaFile, setDemandaFile] = useState<string>("");
 
-  const handleFileUpload = (file: File, type: 'solicitacoes' | 'compras') => {
-    const mapping = type === 'solicitacoes' ? SOLICITACAO_MAPPING : COMPRA_MAPPING;
-    const numberFields = type === 'solicitacoes' 
-      ? ['pendingQuantity', 'attendedQuantity'] 
-      : ['netValue', 'pendingQuantity', 'deliveredQuantity'];
+  const handleFileUpload = (file: File) => {
+    const numberFields: (keyof Demanda)[] = [
+      'netValue', 
+      'pendingQuantity', 
+      'deliveredQuantity', 
+      'requestPendingQuantity', 
+      'requestAttendedQuantity'
+    ];
 
     Papa.parse(file, {
       header: true,
@@ -62,16 +60,16 @@ const IndexPage = () => {
       trimHeaders: true,
       complete: (results) => {
         if (results.errors.length > 0) {
-          showError(`Erro ao processar o arquivo de ${type}. Verifique o formato.`);
+          showError(`Erro ao processar o arquivo. Verifique o formato.`);
           console.error("CSV Errors:", results.errors);
           return;
         }
         
         const mappedData = results.data.map((row: any) => {
-          const newRow: Partial<Solicitacao & Compra> = {};
+          const newRow: Partial<Demanda> = {};
           for (const key in row) {
-            if (mapping[key]) {
-              const newKey = mapping[key];
+            if (DEMANDA_MAPPING[key]) {
+              const newKey = DEMANDA_MAPPING[key];
               if (numberFields.includes(newKey)) {
                 (newRow as any)[newKey] = parseNumber(row[key]);
               } else {
@@ -80,15 +78,10 @@ const IndexPage = () => {
             }
           }
           return newRow;
-        }).filter(row => Object.keys(row).length > 2);
+        }).filter(row => Object.keys(row).length > 5); // Filtra linhas com dados insuficientes
 
-        if (type === 'solicitacoes') {
-          setSolicitacoes(mappedData as Solicitacao[]);
-          setSolicitacoesFile(file.name);
-        } else {
-          setCompras(mappedData as Compra[]);
-          setComprasFile(file.name);
-        }
+        setDemandas(mappedData as Demanda[]);
+        setDemandaFile(file.name);
       },
       error: (error) => {
         showError("Ocorreu um erro inesperado ao ler o arquivo.");
@@ -98,31 +91,24 @@ const IndexPage = () => {
   };
 
   const handleReset = () => {
-    setSolicitacoes([]);
-    setCompras([]);
-    setSolicitacoesFile("");
-    setComprasFile("");
+    setDemandas([]);
+    setDemandaFile("");
   };
 
-  const showDashboard = solicitacoes.length > 0 && compras.length > 0;
+  const showDashboard = demandas.length > 0;
 
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8">
         {showDashboard ? (
-          <Dashboard solicitacoesData={solicitacoes} comprasData={compras} onReset={handleReset} />
+          <Dashboard demandasData={demandas} onReset={handleReset} />
         ) : (
-          <div className="grid md:grid-cols-2 gap-8 mt-10">
+          <div className="grid md:grid-cols-1 gap-8 mt-10 max-w-lg mx-auto">
             <FileUpload 
-              onFileUpload={(file) => handleFileUpload(file, 'solicitacoes')} 
-              title="Relatório de Solicitações (Requisições Internas)"
-              fileName={solicitacoesFile}
-            />
-            <FileUpload 
-              onFileUpload={(file) => handleFileUpload(file, 'compras')} 
-              title="Relatório de Pedidos de Compras (Pedidos Emitidos)"
-              fileName={comprasFile}
+              onFileUpload={handleFileUpload} 
+              title="Carregar Relatório Unificado de Demandas"
+              fileName={demandaFile}
             />
           </div>
         )}

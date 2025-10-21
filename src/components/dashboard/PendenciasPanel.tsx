@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
-import { SolicitacaoProcessada } from './types';
-import { Compra } from '@/types/data';
+import { Demanda } from '@/types/data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -10,9 +9,9 @@ import { Link, AlertTriangle, DollarSign } from 'lucide-react';
 import { KpiCard } from './KpiCard';
 
 interface PendenciasPanelProps {
-  solicitacoesData: SolicitacaoProcessada[];
-  comprasData: Compra[];
-  comprasSemSolicitacao: Compra[];
+  solicitacoesData: Demanda[];
+  comprasData: Demanda[];
+  comprasSemSolicitacao: Demanda[];
 }
 
 export const PendenciasPanel: React.FC<PendenciasPanelProps> = ({ solicitacoesData, comprasData, comprasSemSolicitacao }) => {
@@ -21,9 +20,9 @@ export const PendenciasPanel: React.FC<PendenciasPanelProps> = ({ solicitacoesDa
     // Filtra solicitações que não foram autorizadas (Autorização = 'Não')
     const authorizedSolicitacoes = solicitacoesData.filter(s => s.authorization?.toLowerCase() !== 'não');
 
-    const solicitacoesSemPedido = authorizedSolicitacoes.filter(s => !s.isLinked);
+    const solicitacoesSemPedido = authorizedSolicitacoes.filter(s => !s.orderNumber);
     const totalSolicitacoes = authorizedSolicitacoes.length;
-    const totalConvertidas = authorizedSolicitacoes.filter(s => s.isLinked).length;
+    const totalConvertidas = authorizedSolicitacoes.filter(s => !!s.orderNumber).length;
     
     const conversaoRate = totalSolicitacoes > 0 
       ? ((totalConvertidas / totalSolicitacoes) * 100).toFixed(1) 
@@ -32,7 +31,7 @@ export const PendenciasPanel: React.FC<PendenciasPanelProps> = ({ solicitacoesDa
     // Funil: Solicitado -> Aprovado -> Pedido Emitido -> Entregue
     const funnelData = [
       { name: '1. Solicitado', value: totalSolicitacoes },
-      { name: '2. Aprovado', value: authorizedSolicitacoes.filter(s => s.status?.toLowerCase().includes('aprovada') || s.status?.toLowerCase().includes('atendida')).length },
+      { name: '2. Aprovado', value: authorizedSolicitacoes.filter(s => s.requestStatus?.toLowerCase().includes('aprovada') || s.requestStatus?.toLowerCase().includes('atendida')).length },
       { name: '3. Pedido Emitido', value: totalConvertidas },
       { name: '4. Entregue', value: comprasData.filter(c => c.deliveryStatus?.toLowerCase().includes('entregue')).length },
     ].sort((a, b) => b.value - a.value); // Ordena para simular o funil no BarChart
@@ -116,7 +115,7 @@ export const PendenciasPanel: React.FC<PendenciasPanelProps> = ({ solicitacoesDa
                 {metrics.solicitacoesSemPedido.map(s => (
                   <li key={s.requestNumber} className="text-sm flex justify-between items-center p-2 bg-card/50 rounded">
                     <span className="font-medium text-foreground">{s.requestNumber} - {s.itemDescription}</span>
-                    <Badge variant="secondary" className="ml-2">{s.status}</Badge>
+                    <Badge variant="secondary" className="ml-2">{s.requestStatus}</Badge>
                   </li>
                 ))}
               </ul>

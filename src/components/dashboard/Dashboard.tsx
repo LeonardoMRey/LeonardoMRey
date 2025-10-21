@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Solicitacao, Compra } from "@/types/data";
+import { Demanda } from "@/types/data";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, FileText, Filter } from "lucide-react";
 import { ExportMenu } from "./ExportMenu";
@@ -9,12 +9,11 @@ import { PendenciasPanel } from "./PendenciasPanel";
 import { Separator } from "@/components/ui/separator";
 import { SidebarFilters } from "./SidebarFilters";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { SolicitacaoProcessada, ProcessedData } from "./types";
+import { DemandaProcessada, ProcessedData } from "./types";
 import { parse, isValid } from 'date-fns';
 
 interface DashboardProps {
-  solicitacoesData: Solicitacao[];
-  comprasData: Compra[];
+  demandasData: Demanda[];
   onReset: () => void;
 }
 
@@ -26,7 +25,7 @@ export interface DashboardFilters {
   periodo: 'all' | '30d' | '90d' | '1y';
 }
 
-export const Dashboard = ({ solicitacoesData, comprasData, onReset }: DashboardProps) => {
+export const Dashboard = ({ demandasData, onReset }: DashboardProps) => {
   const [filters, setFilters] = useState<DashboardFilters>({
     responsavel: 'all',
     status: 'all',
@@ -37,29 +36,16 @@ export const Dashboard = ({ solicitacoesData, comprasData, onReset }: DashboardP
 
   // 1. Pré-processamento e Conexão de Dados
   const processedData: ProcessedData = useMemo(() => {
-    // Mapeia pedidos para fácil lookup
-    const ordersMap = new Map(comprasData.map(c => [c.orderNumber, c]));
-
-    // Tenta vincular solicitações a pedidos
-    const solicitacoesWithLinks: SolicitacaoProcessada[] = solicitacoesData.map(s => {
-      const linkedOrder = s.linkedOrderNumber ? ordersMap.get(s.linkedOrderNumber) : undefined;
-      return {
-        ...s,
-        linkedOrder: linkedOrder,
-        isLinked: !!linkedOrder,
-      };
-    });
-
-    // Identifica pedidos sem solicitação de origem (emissão direta)
-    const linkedOrderNumbers = new Set(solicitacoesData.map(s => s.linkedOrderNumber).filter(Boolean));
-    const comprasSemSolicitacao = comprasData.filter(c => !linkedOrderNumbers.has(c.orderNumber));
+    // A Demanda já contém todas as informações. Apenas adicionamos o flag isLinked.
+    const processedDemandas: DemandaProcessada[] = demandasData.map(d => ({
+      ...d,
+      isLinked: !!d.orderNumber,
+    }));
 
     return {
-      solicitacoes: solicitacoesWithLinks,
-      compras: comprasData,
-      comprasSemSolicitacao,
+      demandas: processedDemandas,
     };
-  }, [solicitacoesData, comprasData]);
+  }, [demandasData]);
 
   // 2. Aplicação de Filtros (Lógica de filtragem completa)
   const filteredData = useMemo(() => {
@@ -85,33 +71,28 @@ export const Dashboard = ({ solicitacoesData, comprasData, onReset }: DashboardP
       }
     };
 
-    const filteredSolicitacoes = processedData.solicitacoes.filter(s => {
-      const responsavelMatch = responsavel === 'all' || s.buyer === responsavel;
-      const statusMatch = status === 'all' || s.status === status;
-      const periodMatch = filterByPeriod(s.requestDate);
+    const filteredDemandas = processedData.demandas.filter(d => {
+      const responsavelMatch = responsavel === 'all' || d.buyer === responsavel;
+      const statusMatch = status === 'all' || d.requestStatus === status;
+      const fornecedorMatch = fornecedor === 'all' || d.supplier === fornecedor;
+      const periodMatch = filterByPeriod(d.requestDate); // Filtra pela data de solicitação
       
-      // Ignora filtro de fornecedor para solicitações
-      return responsavelMatch && statusMatch && periodMatch;
+      return responsavelMatch && statusMatch && fornecedorMatch && periodMatch;
     });
 
-    const filteredCompras = processedData.compras.filter(c => {
-      const responsavelMatch = responsavel === 'all' || c.buyer === responsavel;
-      const fornecedorMatch = fornecedor === 'all' || c.supplier === fornecedor;
-      const periodMatch = filterByPeriod(c.deliveryDate); // Usando data de entrega como proxy
-      
-      // Ignora filtro de status para compras
-      return responsavelMatch && fornecedorMatch && periodMatch;
-    });
-
-    // Recalcula compras sem solicitação dentro do filtro
-    const filteredLinkedOrderNumbers = new Set(filteredSolicitacoes.map(s => s.linkedOrderNumber).filter(Boolean));
-    const filteredComprasSemSolicitacao = filteredCompras.filter(c => !filteredLinkedOrderNumbers.has(c.orderNumber));
+    // Separa as demandas em grupos lógicos para os painéis
+    const solicitacoes = filteredDemandas.filter(d => !!d.requestNumber);
+    const pedidos = filteredDemandas.filter(d => !!d.orderNumber);
+    
+    // Pedidos de Emissão Direta: Têm número de pedido, mas não têm número de solicitação
+    const comprasSemSolicitacao = pedidos.filter(d => !d.requestNumber);
 
 
     return {
-      solicitacoes: filteredSolicitacoes,
-      compras: filteredCompras,
-      comprasSemSolicitacao: filteredComprasSemSolicitacao,
+      demandas: filteredDemandas,
+      solicitacoes,
+      pedidos,
+      comprasSemSolicitacao,
     };
   }, [processedData, filters]);
 
@@ -122,7 +103,13 @@ export const Dashboard = ({ solicitacoesData, comprasData, onReset }: DashboardP
       {isSidebarOpen && (
         <div className="w-64 border-r border-border p-4 flex-shrink-0">
           <SidebarFilters 
-            data={processedData} 
+            data={{
+              demandas: processedData.demandas,
+              // Mantendo a estrutura antiga para SidebarFilters funcionar
+              solicitacoes: processedData.demandas,
+              compras: processedData.demandas.filter(d => !!d.orderNumber),
+              comprasSemSolicitacao: processedData.demandas.filter(d => !!d.orderNumber && !d.requestNumber),
+            }} 
             filters={filters} 
             setFilters={setFilters} 
             onClose={() => setIsSidebarOpen(false)}
@@ -145,10 +132,11 @@ export const Dashboard = ({ solicitacoesData, comprasData, onReset }: DashboardP
                   <Filter className="mr-2 h-4 w-4" />
                   {isSidebarOpen ? 'Ocultar Filtros' : 'Mostrar Filtros'}
                 </Button>
-                <ExportMenu solicitacoesData={filteredData.solicitacoes} comprasData={filteredData.compras} />
+                {/* ExportMenu precisa ser atualizado para usar Demanda[] */}
+                <ExportMenu solicitacoesData={filteredData.solicitacoes as any} comprasData={filteredData.pedidos as any} />
                 <Button onClick={onReset} variant="outline">
                   <RefreshCw className="mr-2 h-4 w-4" />
-                  Carregar Novos Arquivos
+                  Carregar Novo Arquivo
                 </Button>
               </div>
             </div>
@@ -156,14 +144,14 @@ export const Dashboard = ({ solicitacoesData, comprasData, onReset }: DashboardP
             <Separator />
 
             {/* Painéis */}
-            <SolicitacoesPanel solicitacoesData={filteredData.solicitacoes} />
+            <SolicitacoesPanel solicitacoesData={filteredData.solicitacoes as any} />
             
-            <PedidosPanel comprasData={filteredData.compras} />
+            <PedidosPanel comprasData={filteredData.pedidos as any} />
 
             <PendenciasPanel 
-              solicitacoesData={filteredData.solicitacoes} 
-              comprasData={filteredData.compras} 
-              comprasSemSolicitacao={filteredData.comprasSemSolicitacao}
+              solicitacoesData={filteredData.solicitacoes as any} 
+              comprasData={filteredData.pedidos as any} 
+              comprasSemSolicitacao={filteredData.comprasSemSolicitacao as any}
             />
           </div>
         </ScrollArea>

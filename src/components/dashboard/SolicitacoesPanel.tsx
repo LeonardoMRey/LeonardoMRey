@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { SolicitacaoProcessada } from './types';
+import { Demanda } from '@/types/data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { KpiCard } from './KpiCard';
 import { Package, CheckCircle, ShoppingCart, Clock, AlertTriangle, Timer } from 'lucide-react';
@@ -9,39 +9,42 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface SolicitacoesPanelProps {
-  solicitacoesData: SolicitacaoProcessada[];
+  solicitacoesData: Demanda[];
 }
 
 export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitacoesData }) => {
   
   const metrics = useMemo(() => {
-    // 1. Filtrar solicitações não autorizadas (Autorização = 'Não')
-    const authorizedSolicitacoes = solicitacoesData.filter(s => s.authorization?.toLowerCase() !== 'não');
+    // Filtra demandas que são solicitações (têm requestNumber) e que foram autorizadas
+    const validSolicitacoes = solicitacoesData.filter(s => 
+      !!s.requestNumber && s.authorization?.toLowerCase() !== 'não'
+    );
     
-    const total = authorizedSolicitacoes.length;
+    const total = validSolicitacoes.length;
     const today = startOfToday();
     
     let totalAprovadas = 0;
     let totalRejeitadas = 0;
     let totalConvertidas = 0;
+    let totalAbertas = 0;
     let totalDaysToApprove = 0;
     let approvedCount = 0;
     
-    const solicitacoesPendentesAtrasadas: SolicitacaoProcessada[] = [];
-    const solicitacoesVinculadas: SolicitacaoProcessada[] = [];
+    const solicitacoesPendentesAtrasadas: Demanda[] = [];
+    const solicitacoesVinculadas: Demanda[] = [];
 
-    authorizedSolicitacoes.forEach(s => {
-      const statusLower = s.status?.toLowerCase() || '';
+    validSolicitacoes.forEach(s => {
+      const statusLower = s.requestStatus?.toLowerCase() || '';
       
       // Lógica de Status
       if (statusLower.includes('totalmente atendida') || statusLower.includes('parcialmente atendida')) {
         // Consideramos 'Aprovada' se foi atendida (total ou parcial)
         totalAprovadas++;
         
-        // Cálculo de tempo médio de aprovação (usando requestDate e deliveryDate/data previsão)
+        // Cálculo de tempo médio de atendimento (usando requestDate e deliveryDate/data prevista)
         try {
           const requestDate = parse(s.requestDate, 'dd/MM/yyyy', new Date());
-          const deliveryDate = parse(s.deliveryDate, 'dd/MM/yyyy', new Date());
+          const deliveryDate = parse(s.deliveryDate || '', 'dd/MM/yyyy', new Date()); // Usa deliveryDate como proxy de atendimento
           
           // Só calcula se ambas as datas forem válidas e a entrega/previsão for posterior à solicitação
           if (isValid(requestDate) && isValid(deliveryDate) && deliveryDate >= requestDate) {
@@ -51,9 +54,11 @@ export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitaco
         } catch {}
       } else if (statusLower.includes('rejeitada') || statusLower.includes('cancelada')) {
         totalRejeitadas++;
+      } else {
+        totalAbertas++;
       }
       
-      if (s.isLinked) {
+      if (s.orderNumber) {
         totalConvertidas++;
         solicitacoesVinculadas.push(s);
       }
@@ -69,14 +74,11 @@ export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitaco
       }
     });
     
-    // Total de Abertas = Total - Aprovadas (atendidas) - Rejeitadas
-    const totalAbertas = total - totalAprovadas - totalRejeitadas;
-
     const tempoMedioAprovacao = approvedCount > 0 ? (totalDaysToApprove / approvedCount).toFixed(1) : 'N/A';
 
     return {
       total,
-      totalAbertas: Math.max(0, totalAbertas), // Garante que não seja negativo
+      totalAbertas: Math.max(0, totalAbertas),
       totalAprovadas,
       totalRejeitadas,
       totalConvertidas,
@@ -139,7 +141,7 @@ export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitaco
                   {metrics.solicitacoesPendentesAtrasadas.map(s => (
                     <li key={s.requestNumber} className="text-sm flex justify-between items-center p-2 bg-card/50 rounded">
                       <span className="font-medium text-foreground">{s.requestNumber} - {s.itemDescription}</span>
-                      <Badge variant="destructive" className="ml-2">{s.status}</Badge>
+                      <Badge variant="destructive" className="ml-2">{s.requestStatus}</Badge>
                     </li>
                   ))}
                 </ul>
@@ -163,7 +165,7 @@ export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitaco
                   {metrics.solicitacoesVinculadas.map(s => (
                     <li key={s.requestNumber} className="text-sm flex justify-between items-center p-2 bg-card/50 rounded">
                       <span className="font-medium text-foreground">{s.requestNumber}</span>
-                      <Badge className="bg-primary hover:bg-primary/80 ml-2">Pedido: {s.linkedOrderNumber}</Badge>
+                      <Badge className="bg-primary hover:bg-primary/80 ml-2">Pedido: {s.orderNumber}</Badge>
                     </li>
                   ))}
                 </ul>
