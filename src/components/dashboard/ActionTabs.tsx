@@ -22,27 +22,19 @@ const TableGargaloInterno: React.FC<{ data: DemandaConsolidada[] }> = ({ data })
                 <TableHeader className="sticky top-0 bg-card z-10">
                     <TableRow>
                         <TableHead>Nº Solicitação</TableHead>
-                        <TableHead>Data Solicitação</TableHead>
+                        <TableHead>Data</TableHead>
                         <TableHead>Solicitante</TableHead>
-                        <TableHead>Obra</TableHead>
-                        <TableHead>Descrição do Insumo</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {filteredData.length === 0 ? (
-                        <TableRow>
-                            <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
-                                🎉 Nenhuma solicitação pendente de conversão!
-                            </TableCell>
-                        </TableRow>
+                        <TableRow><TableCell colSpan={3} className="h-24 text-center text-muted-foreground">🎉 Nenhuma pendência!</TableCell></TableRow>
                     ) : (
                         filteredData.map((d, index) => (
                             <TableRow key={index}>
                                 <TableCell className="font-medium">{d.requestNumber}</TableCell>
                                 <TableCell>{d.requestDate}</TableCell>
-                                <TableCell>{d.buyer}</TableCell> {/* Solicitante */}
-                                <TableCell>{d.project}</TableCell>
-                                <TableCell>{d.itemDescription}</TableCell>
+                                <TableCell>{d.buyer}</TableCell>
                             </TableRow>
                         ))
                     )}
@@ -64,35 +56,20 @@ const TableGargaloExterno: React.FC<{ data: DemandaConsolidada[] }> = ({ data })
                     <TableRow>
                         <TableHead>N° Pedido</TableHead>
                         <TableHead>Fornecedor</TableHead>
-                        <TableHead>Comprador</TableHead>
-                        <TableHead>Previsão de Entrega</TableHead>
-                        <TableHead>Situação do Pedido</TableHead>
-                        <TableHead className="text-right">Saldo Pendente</TableHead>
+                        <TableHead>Previsão</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {filteredData.length === 0 ? (
-                        <TableRow>
-                            <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                                Todos os pedidos em aberto foram entregues.
-                            </TableCell>
-                        </TableRow>
+                        <TableRow><TableCell colSpan={3} className="h-24 text-center text-muted-foreground">Nenhum pedido pendente.</TableCell></TableRow>
                     ) : (
                         filteredData.map((d, index) => {
                             const isAtrasado = isDateBeforeToday(d.deliveryForecast);
                             return (
-                                <TableRow 
-                                    key={index} 
-                                    className={cn(isAtrasado && 'bg-red-900/30 hover:bg-red-900/50 transition-colors')}
-                                >
+                                <TableRow key={index} className={cn(isAtrasado && 'bg-destructive/20 hover:bg-destructive/30')}>
                                     <TableCell className="font-medium">{d.orderNumber}</TableCell>
                                     <TableCell>{d.supplier}</TableCell>
-                                    <TableCell>{d.buyer}</TableCell>
-                                    <TableCell className={cn(isAtrasado && 'text-red-400 font-semibold')}>
-                                        {d.deliveryForecast}
-                                    </TableCell>
-                                    <TableCell>{d.orderStatus}</TableCell>
-                                    <TableCell className="text-right">{formatNumber(d.pendingQuantity)}</TableCell>
+                                    <TableCell className={cn(isAtrasado && 'text-destructive font-semibold')}>{d.deliveryForecast}</TableCell>
                                 </TableRow>
                             );
                         })
@@ -109,17 +86,15 @@ export const ActionTabs: React.FC<ActionTabsProps> = ({ data }) => {
             <CardHeader>
                 <CardTitle>Gestão de Gargalos</CardTitle>
             </CardHeader>
-            <CardContent className="flex-grow p-0 pb-6 px-6 flex flex-col min-h-0">
+            <CardContent className="flex-grow p-4 flex flex-col min-h-0">
                 <Tabs defaultValue="interno" className="h-full flex flex-col">
                     <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="interno">Gargalo Interno</TabsTrigger>
                         <TabsTrigger value="externo">Gargalo Externo</TabsTrigger>
                     </TabsList>
-                    
                     <TabsContent value="interno" className="mt-4 flex-grow min-h-0">
                         <TableGargaloInterno data={data} />
                     </TabsContent>
-                    
                     <TabsContent value="externo" className="mt-4 flex-grow min-h-0">
                         <TableGargaloExterno data={data} />
                     </TabsContent>

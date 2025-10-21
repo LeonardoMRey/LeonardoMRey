@@ -21,91 +21,47 @@ interface DashboardFiltersProps {
 }
 
 export const DashboardFilters = ({
-  dateRange,
-  setDateRange,
-  project,
-  setProject,
-  buyer,
-  setBuyer,
-  projectOptions,
-  buyerOptions,
-  clearFilters,
+  dateRange, setDateRange, project, setProject, buyer, setBuyer, projectOptions, buyerOptions, clearFilters,
 }: DashboardFiltersProps) => {
   const hasActiveFilters = dateRange || project || buyer;
 
   return (
-    <div className="flex flex-col md:flex-row items-center gap-4 p-4 border rounded-lg bg-card mb-6">
-      <h3 className="text-lg font-semibold text-foreground hidden lg:block">Filtros:</h3>
-      
-      {/* Date Range Picker */}
+    <div className="flex items-center gap-2">
       <Popover>
         <PopoverTrigger asChild>
-          <Button
-            id="date"
-            variant={"outline"}
-            className={cn(
-              "w-full md:w-[300px] justify-start text-left font-normal",
-              !dateRange && "text-muted-foreground"
-            )}
-          >
+          <Button id="date" variant={"outline"} className={cn("w-[260px] justify-start text-left font-normal", !dateRange && "text-muted-foreground")}>
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {dateRange?.from ? (
-              dateRange.to ? (
-                <>
-                  {format(dateRange.from, "dd/MM/y", { locale: ptBR })} -{" "}
-                  {format(dateRange.to, "dd/MM/y", { locale: ptBR })}
-                </>
-              ) : (
-                format(dateRange.from, "dd/MM/y", { locale: ptBR })
-              )
-            ) : (
-              <span>Selecione um período</span>
-            )}
+            {dateRange?.from ? (dateRange.to ? (<>{format(dateRange.from, "dd/MM/y", { locale: ptBR })} - {format(dateRange.to, "dd/MM/y", { locale: ptBR })}</>) : (format(dateRange.from, "dd/MM/y", { locale: ptBR }))) : (<span>Período</span>)}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            initialFocus
-            mode="range"
-            defaultMonth={dateRange?.from}
-            selected={dateRange}
-            onSelect={setDateRange}
-            numberOfMonths={2}
-            locale={ptBR}
-          />
+        <PopoverContent className="w-auto p-0" align="end">
+          <Calendar initialFocus mode="range" defaultMonth={dateRange?.from} selected={dateRange} onSelect={setDateRange} numberOfMonths={2} locale={ptBR} />
         </PopoverContent>
       </Popover>
 
-      {/* Project Filter */}
       <Select value={project} onValueChange={setProject}>
-        <SelectTrigger className="w-full md:w-[250px]">
-          <SelectValue placeholder="Filtrar por Obra" />
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Obra" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todas as Obras</SelectItem>
-          {projectOptions.map((opt) => (
-            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-          ))}
+          {projectOptions.map((opt) => (<SelectItem key={opt} value={opt}>{opt}</SelectItem>))}
         </SelectContent>
       </Select>
 
-      {/* Buyer Filter */}
       <Select value={buyer} onValueChange={setBuyer}>
-        <SelectTrigger className="w-full md:w-[250px]">
-          <SelectValue placeholder="Filtrar por Comprador" />
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Comprador" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todos os Compradores</SelectItem>
-          {buyerOptions.map((opt) => (
-            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-          ))}
+          {buyerOptions.map((opt) => (<SelectItem key={opt} value={opt}>{opt}</SelectItem>))}
         </SelectContent>
       </Select>
 
       {hasActiveFilters && (
         <Button variant="ghost" onClick={clearFilters} className="text-muted-foreground">
-          <X className="mr-2 h-4 w-4" />
-          Limpar Filtros
+          <X className="mr-2 h-4 w-4" /> Limpar
         </Button>
       )}
     </div>
