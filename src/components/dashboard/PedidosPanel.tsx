@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 import { Compra } from '@/types/data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { KpiCard } from './KpiCard';
-import { ShoppingCart, Truck, Clock, XCircle, Timer, AlertTriangle } from 'lucide-react';
-import { parse, differenceInDays, isBefore, startOfToday } from 'date-fns';
+import { ShoppingCart, Truck, Clock, XCircle, AlertTriangle } from 'lucide-react';
+import { parse, isBefore, startOfToday, isValid } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -20,8 +20,6 @@ export const PedidosPanel: React.FC<PedidosPanelProps> = ({ comprasData }) => {
     let totalEntregues = 0;
     let totalAtraso = 0;
     let totalCancelados = 0;
-    let totalDaysToDelivery = 0;
-    let deliveredCount = 0;
     
     const pedidosAtrasados: Compra[] = [];
     const pedidosAguardandoEntrega: Compra[] = [];
@@ -32,17 +30,6 @@ export const PedidosPanel: React.FC<PedidosPanelProps> = ({ comprasData }) => {
       
       if (statusLower.includes('entregue')) {
         totalEntregues++;
-        
-        // Cálculo de tempo médio de entrega (usando data de entrega vs data prevista como proxy para emissão vs entrega)
-        try {
-          const deliveryDate = parse(c.deliveryDate, 'dd/MM/yyyy', new Date());
-          // Assumindo que a data de emissão é a data de criação do registro (não temos esse campo, então usamos uma data fixa ou a data de hoje - vamos usar 30 dias antes da entrega como proxy)
-          const issueDateProxy = new Date(deliveryDate);
-          issueDateProxy.setDate(deliveryDate.getDate() - 30); // Proxy: 30 dias antes da entrega
-          
-          totalDaysToDelivery += differenceInDays(deliveryDate, issueDateProxy);
-          deliveredCount++;
-        } catch {}
       } else if (statusLower.includes('cancelado')) {
         totalCancelados++;
       }
@@ -51,7 +38,7 @@ export const PedidosPanel: React.FC<PedidosPanelProps> = ({ comprasData }) => {
       try {
         const dataPrevista = parse(c.deliveryDate, 'dd/MM/yyyy', new Date());
         
-        if (isBefore(dataPrevista, today) && !statusLower.includes('entregue') && !statusLower.includes('cancelado')) {
+        if (isValid(dataPrevista) && isBefore(dataPrevista, today) && !statusLower.includes('entregue') && !statusLower.includes('cancelado')) {
           totalAtraso++;
           pedidosAtrasados.push(c);
         }
@@ -62,14 +49,11 @@ export const PedidosPanel: React.FC<PedidosPanelProps> = ({ comprasData }) => {
       } catch {}
     });
 
-    const tempoMedioEntrega = deliveredCount > 0 ? (totalDaysToDelivery / deliveredCount).toFixed(1) : 'N/A';
-
     return {
       totalPedidos,
       totalEntregues,
       totalAtraso,
       totalCancelados,
-      tempoMedioEntrega,
       pedidosAtrasados,
       pedidosAguardandoEntrega,
     };
@@ -80,7 +64,7 @@ export const PedidosPanel: React.FC<PedidosPanelProps> = ({ comprasData }) => {
       <h2 className="text-2xl font-bold text-primary">🟦 Painel de Pedidos (Pedidos Emitidos)</h2>
       
       {/* KPIs */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <KpiCard 
           title="Total de Pedidos Emitidos" 
           value={metrics.totalPedidos} 
@@ -104,12 +88,6 @@ export const PedidosPanel: React.FC<PedidosPanelProps> = ({ comprasData }) => {
           value={metrics.totalCancelados} 
           icon={XCircle} 
           iconColorClass="text-muted-foreground"
-        />
-        <KpiCard 
-          title="Tempo Médio Entrega (dias)" 
-          value={metrics.tempoMedioEntrega} 
-          icon={Timer} 
-          iconColorClass="text-primary"
         />
       </div>
 

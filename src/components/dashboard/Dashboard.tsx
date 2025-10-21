@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarFilters } from "./SidebarFilters";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SolicitacaoProcessada, ProcessedData } from "./types";
-import { parse } from 'date-fns';
+import { parse, isValid } from 'date-fns';
 
 interface DashboardProps {
   solicitacoesData: Solicitacao[];
@@ -71,6 +71,8 @@ export const Dashboard = ({ solicitacoesData, comprasData, onReset }: DashboardP
       
       try {
         const date = parse(dateString, 'dd/MM/yyyy', new Date());
+        if (!isValid(date)) return true; // Se a data for inválida, não filtra o item
+
         let cutoffDate = new Date();
         
         if (periodo === '30d') cutoffDate.setDate(today.getDate() - 30);
@@ -79,7 +81,7 @@ export const Dashboard = ({ solicitacoesData, comprasData, onReset }: DashboardP
         
         return date >= cutoffDate;
       } catch {
-        return false;
+        return true; // Permanece leniente se o parse falhar
       }
     };
 

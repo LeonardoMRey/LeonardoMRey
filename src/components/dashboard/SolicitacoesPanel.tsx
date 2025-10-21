@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 import { SolicitacaoProcessada } from './types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { KpiCard } from './KpiCard';
-import { Package, CheckCircle, XCircle, ShoppingCart, Clock, AlertTriangle, Timer } from 'lucide-react';
-import { parse, differenceInDays, isBefore, startOfToday } from 'date-fns';
+import { Package, CheckCircle, ShoppingCart, Clock, AlertTriangle, Timer } from 'lucide-react';
+import { parse, differenceInDays, startOfToday, isValid } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -22,6 +22,7 @@ export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitaco
     let totalRejeitadas = 0;
     let totalConvertidas = 0;
     let totalAbertas = 0;
+    let totalAtendidas = 0;
     let totalDaysToApprove = 0;
     let approvedCount = 0;
     
@@ -33,17 +34,18 @@ export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitaco
       
       if (statusLower.includes('aprovada')) {
         totalAprovadas++;
-        // Cálculo de tempo médio de aprovação (assumindo que 'deliveryDate' é a data de aprovação se 'status' for aprovado)
         try {
           const requestDate = parse(s.requestDate, 'dd/MM/yyyy', new Date());
           const approvalDate = parse(s.deliveryDate, 'dd/MM/yyyy', new Date());
-          if (approvalDate > requestDate) {
+          if (isValid(requestDate) && isValid(approvalDate) && approvalDate > requestDate) {
             totalDaysToApprove += differenceInDays(approvalDate, requestDate);
             approvedCount++;
           }
         } catch {}
       } else if (statusLower.includes('rejeitada') || statusLower.includes('cancelada')) {
         totalRejeitadas++;
+      } else if (statusLower.includes('atendida')) {
+        totalAtendidas++;
       } else {
         totalAbertas++;
       }
@@ -53,11 +55,11 @@ export const SolicitacoesPanel: React.FC<SolicitacoesPanelProps> = ({ solicitaco
         solicitacoesVinculadas.push(s);
       }
 
-      // Destaque: Solicitações com mais de 5 dias sem andamento (usamos a data de solicitação como referência)
+      // Destaque: Solicitações com mais de 5 dias sem andamento
       if (statusLower === 'solicitado' || statusLower === 'em análise') {
         try {
           const requestDate = parse(s.requestDate, 'dd/MM/yyyy', new Date());
-          if (differenceInDays(today, requestDate) > 5) {
+          if (isValid(requestDate) && differenceInDays(today, requestDate) > 5) {
             solicitacoesPendentesAtrasadas.push(s);
           }
         } catch {}

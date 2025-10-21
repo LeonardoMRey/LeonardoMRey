@@ -38,7 +38,8 @@ const COMPRA_MAPPING: { [key: string]: keyof Compra } = {
 const parseNumber = (value: string): number => {
   if (!value || typeof value !== 'string') return 0;
   const cleanedValue = value.replace("R$", "").trim().replace(/\./g, "").replace(",", ".");
-  return parseFloat(cleanedValue) || 0;
+  const num = parseFloat(cleanedValue);
+  return isNaN(num) ? 0 : num;
 };
 
 const IndexPage = () => {
@@ -57,6 +58,7 @@ const IndexPage = () => {
       header: true,
       skipEmptyLines: true,
       delimiter: ";",
+      trimHeaders: true,
       complete: (results) => {
         if (results.errors.length > 0) {
           showError(`Erro ao processar o arquivo de ${type}. Verifique o formato.`);
