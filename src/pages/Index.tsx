@@ -103,8 +103,8 @@ const IndexPage = () => {
     return demandas.filter(d => {
       const requestDate = parseDateString(d.requestDate);
       const isDateInRange = !dateRange?.from || !requestDate || isWithinInterval(requestDate, { start: dateRange.from, end: dateRange.to || dateRange.from });
-      const isProjectMatch = !selectedProject || d.project === selectedProject;
-      const isBuyerMatch = !selectedBuyer || d.buyer === selectedBuyer;
+      const isProjectMatch = !selectedProject || selectedProject === 'all' || d.project === selectedProject;
+      const isBuyerMatch = !selectedBuyer || selectedBuyer === 'all' || d.buyer === selectedBuyer;
       return isDateInRange && isProjectMatch && isBuyerMatch;
     });
   }, [demandas, dateRange, selectedProject, selectedBuyer]);

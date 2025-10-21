@@ -82,7 +82,7 @@ export const DashboardFilters = ({
           <SelectValue placeholder="Filtrar por Obra" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">Todas as Obras</SelectItem>
+          <SelectItem value="all">Todas as Obras</SelectItem>
           {projectOptions.map((opt) => (
             <SelectItem key={opt} value={opt}>{opt}</SelectItem>
           ))}
@@ -95,7 +95,7 @@ export const DashboardFilters = ({
           <SelectValue placeholder="Filtrar por Comprador" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">Todos os Compradores</SelectItem>
+          <SelectItem value="all">Todos os Compradores</SelectItem>
           {buyerOptions.map((opt) => (
             <SelectItem key={opt} value={opt}>{opt}</SelectItem>
           ))}
