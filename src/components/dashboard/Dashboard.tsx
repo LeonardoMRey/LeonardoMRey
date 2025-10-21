@@ -5,9 +5,9 @@ import { Separator } from "@/components/ui/separator";
 import { KpiCard } from "./KpiCard";
 import { ActionTabs } from "./ActionTabs";
 import { BarChart } from "../charts/BarChart";
-import { AlertTriangle, CheckCircle, Clock, Percent, Target, TrendingUp } from "lucide-react";
-import { calculateLeadTime, formatCurrency, formatNumber, parseDateString } from "@/utils/data-processing";
-import { isBefore, isValid } from "date-fns";
+import { CheckCircle, Clock, Target, TrendingUp } from "lucide-react";
+import { calculateLeadTime, parseDateString } from "@/utils/data-processing";
+import { isAfter } from "date-fns";
 
 interface DashboardProps {
   data: DemandaConsolidada[];
@@ -30,44 +30,42 @@ export const Dashboard = ({ data }: DashboardProps) => {
     const uniquePedidos = [...new Set(pedidos.map(p => p.orderNumber))];
     const totalPedidosUnicos = uniquePedidos.length;
     
-    let pedidosTotalmenteEntregues = 0;
-    
     const spendPorObra: { [key: string]: number } = {};
     const atrasosPorFornecedor: { [key: string]: number } = {};
 
     data.forEach(d => {
       const requestDate = parseDateString(d.requestDate);
-      const orderDate = parseDateString(d.orderDate); // Assumindo que 'orderDate' pode existir
-      const deliveryDate = parseDateString(d.deliveryForecast); // Usando previsão como data de entrega
+      const orderDate = parseDateString(d.orderDate);
+      const actualDeliveryDate = parseDateString(d.actualDeliveryDate);
+      const forecastDeliveryDate = parseDateString(d.deliveryForecast);
 
       // Lead Times
-      if (requestDate && deliveryDate) {
-        const leadTimeTotal = calculateLeadTime(d.requestDate, d.deliveryForecast);
-        if (leadTimeTotal !== null) {
-          leadTimeTotalDays += leadTimeTotal;
+      if (requestDate && actualDeliveryDate) {
+        const leadTime = calculateLeadTime(d.requestDate, d.actualDeliveryDate);
+        if (leadTime !== null) {
+          leadTimeTotalDays += leadTime;
           leadTimeTotalCount++;
         }
       }
       if (requestDate && orderDate) {
-        const leadTimeInterno = calculateLeadTime(d.requestDate, d.orderDate);
-        if (leadTimeInterno !== null) {
-          leadTimeInternoDays += leadTimeInterno;
+        const leadTime = calculateLeadTime(d.requestDate, d.orderDate);
+        if (leadTime !== null) {
+          leadTimeInternoDays += leadTime;
           leadTimeInternoCount++;
         }
       }
-      if (orderDate && deliveryDate) {
-        const leadTimeExterno = calculateLeadTime(d.orderDate, d.deliveryForecast);
-        if (leadTimeExterno !== null) {
-          leadTimeExternoDays += leadTimeExterno;
+      if (orderDate && actualDeliveryDate) {
+        const leadTime = calculateLeadTime(d.orderDate, d.actualDeliveryDate);
+        if (leadTime !== null) {
+          leadTimeExternoDays += leadTime;
           leadTimeExternoCount++;
         }
       }
 
-      // OTD (On-Time Delivery)
-      const previsaoEntrega = parseDateString(d.deliveryForecast);
-      if (deliveryDate && previsaoEntrega && isValid(deliveryDate) && isValid(previsaoEntrega)) {
+      // OTD (On-Time Delivery): actual <= forecast
+      if (actualDeliveryDate && forecastDeliveryDate) {
         totalEntregasConsideradas++;
-        if (!isBefore(previsaoEntrega, deliveryDate)) { // entrega <= previsão
+        if (!isAfter(actualDeliveryDate, forecastDeliveryDate)) {
           entregasNoPrazo++;
         }
       }
@@ -77,8 +75,8 @@ export const Dashboard = ({ data }: DashboardProps) => {
         spendPorObra[d.project] = (spendPorObra[d.project] || 0) + d.invoiceValue;
       }
       
-      // Atrasos por Fornecedor
-      if (d.supplier && deliveryDate && previsaoEntrega && isBefore(previsaoEntrega, deliveryDate)) {
+      // Atrasos por Fornecedor: actual > forecast
+      if (d.supplier && actualDeliveryDate && forecastDeliveryDate && isAfter(actualDeliveryDate, forecastDeliveryDate)) {
         atrasosPorFornecedor[d.supplier] = (atrasosPorFornecedor[d.supplier] || 0) + 1;
       }
     });
@@ -89,7 +87,7 @@ export const Dashboard = ({ data }: DashboardProps) => {
         .filter(p => p.orderStatus?.toLowerCase().includes('totalmente entregue'))
         .map(p => p.orderNumber)
     );
-    pedidosTotalmenteEntregues = pedidosEntreguesSet.size;
+    const pedidosTotalmenteEntregues = pedidosEntreguesSet.size;
 
     const leadTimeTotalMedio = leadTimeTotalCount > 0 ? (leadTimeTotalDays / leadTimeTotalCount).toFixed(1) : 'N/A';
     const leadTimeInternoMedio = leadTimeInternoCount > 0 ? (leadTimeInternoDays / leadTimeInternoCount).toFixed(1) : 'N/A';
@@ -105,7 +103,7 @@ export const Dashboard = ({ data }: DashboardProps) => {
     const atrasosPorFornecedorChartData = Object.entries(atrasosPorFornecedor)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value)
-      .slice(0, 10); // Top 10
+      .slice(0, 10);
 
     return {
       leadTimeTotalMedio,
@@ -124,7 +122,6 @@ export const Dashboard = ({ data }: DashboardProps) => {
         <h1 className="text-3xl font-bold text-foreground">Painel de Performance de Compras</h1>
         <Separator />
 
-        {/* A. Indicadores de Performance (KPIs) */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
           <KpiCard 
             title="Lead Time Total Médio" 
@@ -165,7 +162,6 @@ export const Dashboard = ({ data }: DashboardProps) => {
         
         <Separator />
 
-        {/* B. Gráficos de Análise Gerencial */}
         <div className="grid gap-6 lg:grid-cols-2">
             <BarChart 
                 title="Spend por Obra"
@@ -192,7 +188,6 @@ export const Dashboard = ({ data }: DashboardProps) => {
         
         <Separator />
 
-        {/* C. Tabelas de Ação (Gargalos) */}
         <ActionTabs data={data} />
         
       </div>

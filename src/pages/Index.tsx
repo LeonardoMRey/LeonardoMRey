@@ -28,19 +28,19 @@ const DEMANDA_MAPPING: { [key: string]: keyof DemandaConsolidada } = {
   "Quantidade entregue": "deliveredQuantity",
   "Saldo": "pendingQuantity",
   
-  // Nota: 'Data do pedido' e 'Solicitante' não estão presentes no CSV anexo.
+  "Data do pedido": "orderDate",
+  "Data entrega na obra": "actualDeliveryDate",
 };
 
 const parseNumber = (value: string | number | undefined): number => {
   if (typeof value === 'number') return value;
   if (!value || typeof value !== 'string') return 0;
   
-  // Remove R$, remove pontos de milhar e substitui vírgula por ponto decimal (Formato Brasileiro)
   const cleanedValue = value
     .replace("R$", "")
     .trim()
-    .replace(/\./g, "") // Remove separador de milhar (ponto)
-    .replace(",", "."); // Substitui separador decimal (vírgula) por ponto
+    .replace(/\./g, "")
+    .replace(",", ".");
     
   const num = parseFloat(cleanedValue);
   return isNaN(num) ? 0 : num;
@@ -58,7 +58,6 @@ const IndexPage = () => {
       'pendingQuantity',
     ];
     
-    // Campos que devem ser tratados como strings vazias se forem 'Nenhum' ou nulos
     const stringFields: (keyof DemandaConsolidada)[] = [
         'buyer', 'orderNumber', 'supplier', 'orderStatus', 'deliveryForecast'
     ];
@@ -78,7 +77,6 @@ const IndexPage = () => {
         const mappedData = results.data.map((row: any) => {
           const newRow: Partial<DemandaConsolidada> = {};
           
-          // Mapeamento e conversão de tipos
           for (const key in row) {
             if (DEMANDA_MAPPING[key]) {
               const newKey = DEMANDA_MAPPING[key];
@@ -87,7 +85,6 @@ const IndexPage = () => {
               if (numberFields.includes(newKey)) {
                 (newRow as any)[newKey] = parseNumber(value);
               } else {
-                // Tratar valores como 'Nenhum' ou vazios como string vazia para campos chave
                 if (stringFields.includes(newKey) && (value === 'Nenhum' || value === null || value === undefined)) {
                     value = '';
                 }
@@ -96,14 +93,12 @@ const IndexPage = () => {
             }
           }
           
-          // Adicionando itemDescription que é crucial
           if (!newRow.itemDescription && row["Descrição do insumo"]) {
               newRow.itemDescription = row["Descrição do insumo"];
           }
 
           return newRow;
         }).filter(row => {
-          // Uma linha é válida se tiver um número de solicitação OU um número de pedido.
           const hasRequest = !!(row as DemandaConsolidada).requestNumber;
           const hasOrder = !!(row as DemandaConsolidada).orderNumber;
           return hasRequest || hasOrder;
@@ -125,11 +120,6 @@ const IndexPage = () => {
         console.error("PapaParse Error:", error);
       }
     });
-  };
-
-  const handleReset = () => {
-    setDemandas([]);
-    setDemandaFile("");
   };
 
   const showDashboard = demandas.length > 0;

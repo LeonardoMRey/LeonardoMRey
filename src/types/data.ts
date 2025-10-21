@@ -20,6 +20,6 @@ export interface DemandaConsolidada {
   pendingQuantity: number; // Saldo
   invoiceValue: number; // Valor da nota
   
-  // Data do pedido (Não presente no CSV anexo, mas mantido para compatibilidade)
-  orderDate?: string; 
+  orderDate?: string; // Data do pedido
+  actualDeliveryDate?: string; // Data entrega na obra
 }

@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ResponsiveContainer, BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { ResponsiveContainer, BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { formatCurrency } from '@/utils/data-processing';
 
 interface BarChartProps {
@@ -38,7 +38,10 @@ export const BarChart: React.FC<BarChartProps> = ({
           <RechartsBarChart 
             data={data} 
             layout={layout} 
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            margin={isVertical ? 
+                { top: 5, right: 30, left: 20, bottom: 5 } :
+                { top: 5, right: 30, left: 20, bottom: 80 }
+            }
           >
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(224, 224, 224, 0.1)" />
             
@@ -59,11 +62,21 @@ export const BarChart: React.FC<BarChartProps> = ({
                   fontSize={10} 
                   tickLine={false} 
                   axisLine={false} 
+                  width={120}
                 />
               </>
             ) : (
               <>
-                <XAxis dataKey={dataKeyX} stroke="#E0E0E0" fontSize={10} tickLine={false} axisLine={false} />
+                <XAxis 
+                  dataKey={dataKeyX} 
+                  stroke="#E0E0E0" 
+                  fontSize={10} 
+                  tickLine={false} 
+                  axisLine={false}
+                  angle={-45}
+                  textAnchor="end"
+                  interval={0}
+                />
                 <YAxis 
                     type="number" 
                     stroke="#E0E0E0" 
