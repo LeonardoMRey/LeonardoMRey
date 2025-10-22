@@ -92,6 +92,7 @@ export const EficienciaComprasDashboard = ({ data }: DashboardProps) => {
           icon={CheckCheck} 
           iconColorClass="text-positive"
           tooltipText="Percentual de pedidos entregues na data prevista ou antes."
+          delay={0}
         />
         <KpiCard 
           title="Taxa de Atendimento" 
@@ -99,16 +100,22 @@ export const EficienciaComprasDashboard = ({ data }: DashboardProps) => {
           icon={PackageCheck} 
           iconColorClass="text-positive"
           tooltipText="Percentual da quantidade total de itens solicitados que foi efetivamente entregue."
+          delay={100}
         />
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
-        <PieChart title="Total de Solicitações por Situação" data={processedMetrics.solicitacoesStatusChartData} />
+        <PieChart 
+          title="Total de Solicitações por Situação" 
+          data={processedMetrics.solicitacoesStatusChartData} 
+          delay={200}
+        />
         <StackedBarChart 
           title="Pedidos por Situação de Autorização" 
           data={processedMetrics.pedidosAutorizacaoChartData} 
           dataKeyX="name"
           bars={processedMetrics.authStatusSet.map(status => ({ dataKey: status, name: status, color: authStatusColors[status] || '#8884d8' }))}
+          delay={300}
         />
       </div>
 
@@ -119,6 +126,7 @@ export const EficienciaComprasDashboard = ({ data }: DashboardProps) => {
           dataKeyX="name"
           barKey="value"
           lineKey="cumulativePercent"
+          delay={400}
         />
       </div>
     </div>

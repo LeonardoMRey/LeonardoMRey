@@ -95,6 +95,7 @@ export const DesempenhoOperacionalDashboard = ({ data }: DashboardProps) => {
           icon={TrendingUp} 
           iconColorClass="text-warning"
           tooltipText="Tempo médio entre a data da solicitação e a entrega efetiva na obra."
+          delay={0}
         />
         <KpiCard 
           title="Tempo Médio: Solicitação -> Pedido" 
@@ -102,6 +103,7 @@ export const DesempenhoOperacionalDashboard = ({ data }: DashboardProps) => {
           icon={Clock} 
           iconColorClass="text-warning"
           tooltipText="Tempo médio entre a data da solicitação e a data de emissão do pedido de compra."
+          delay={100}
         />
         <KpiCard 
           title="Lead Time Externo (Fornecedor)" 
@@ -109,6 +111,7 @@ export const DesempenhoOperacionalDashboard = ({ data }: DashboardProps) => {
           icon={Clock} 
           iconColorClass="text-warning"
           tooltipText="Tempo médio entre a data do pedido de compra e a entrega efetiva na obra."
+          delay={200}
         />
       </div>
 
@@ -119,6 +122,7 @@ export const DesempenhoOperacionalDashboard = ({ data }: DashboardProps) => {
           dataKeyX="month" 
           barKey1="Solicitações"
           barKey2="Pedidos"
+          delay={300}
         />
       </div>
 
@@ -128,6 +132,7 @@ export const DesempenhoOperacionalDashboard = ({ data }: DashboardProps) => {
           data={processedMetrics.leadTimeEvolucaoChartData} 
           dataKeyX="month" 
           lines={[{ dataKey: "Lead Time Médio", stroke: "hsl(var(--primary))", name: "Lead Time Médio" }]} 
+          delay={400}
         />
         <BarChart 
           title="Gargalos Internos por Solicitante" 
@@ -137,6 +142,7 @@ export const DesempenhoOperacionalDashboard = ({ data }: DashboardProps) => {
           barKey="value" 
           layout="vertical" 
           barColor="hsl(var(--primary))" 
+          delay={500}
         />
       </div>
     </div>

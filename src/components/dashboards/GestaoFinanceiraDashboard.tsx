@@ -58,6 +58,7 @@ export const GestaoFinanceiraDashboard = ({ data }: DashboardProps) => {
           icon={DollarSign} 
           iconColorClass="text-positive"
           tooltipText="Soma do valor de nota de todos os itens no período e filtros selecionados."
+          delay={0}
         />
         <KpiCard 
           title="Valor Médio Faturado por Item" 
@@ -65,6 +66,7 @@ export const GestaoFinanceiraDashboard = ({ data }: DashboardProps) => {
           icon={DollarSign} 
           iconColorClass="text-positive"
           tooltipText="Valor médio de cada item de compra que possui nota fiscal."
+          delay={100}
         />
         <KpiCard 
           title="Pagamentos Não Realizados" 
@@ -73,6 +75,7 @@ export const GestaoFinanceiraDashboard = ({ data }: DashboardProps) => {
           icon={AlertTriangle} 
           iconColorClass="text-warning"
           tooltipText="Mostra o total de pagamentos ainda não efetuados a fornecedores."
+          delay={200}
         />
       </div>
 
@@ -87,6 +90,7 @@ export const GestaoFinanceiraDashboard = ({ data }: DashboardProps) => {
           layout="vertical" 
           barColor="hsl(var(--positive))"
           isCurrency
+          delay={300}
         />
       </div>
 
@@ -100,6 +104,7 @@ export const GestaoFinanceiraDashboard = ({ data }: DashboardProps) => {
           layout="horizontal" 
           barColor="hsl(var(--positive))"
           isCurrency
+          delay={400}
         />
         <BarChart 
           title="Top 10 - Gastos por Comprador" 
@@ -110,6 +115,7 @@ export const GestaoFinanceiraDashboard = ({ data }: DashboardProps) => {
           layout="horizontal" 
           barColor="hsl(var(--positive))"
           isCurrency
+          delay={500}
         />
       </div>
     </div>

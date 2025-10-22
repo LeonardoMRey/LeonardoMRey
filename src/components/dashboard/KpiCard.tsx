@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { AnimatedCard } from '../ui/AnimatedCard';
 
 interface KpiCardProps {
   title: string;
@@ -10,9 +11,10 @@ interface KpiCardProps {
   iconColorClass?: string;
   description?: string;
   tooltipText?: string;
+  delay?: number; // Adiciona delay para animação sequencial
 }
 
-export const KpiCard: React.FC<KpiCardProps> = ({ title, value, icon: Icon, iconColorClass = 'text-primary', description, tooltipText }) => {
+export const KpiCard: React.FC<KpiCardProps> = ({ title, value, icon: Icon, iconColorClass = 'text-primary', description, tooltipText, delay = 0 }) => {
   const cardContent = (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -26,18 +28,16 @@ export const KpiCard: React.FC<KpiCardProps> = ({ title, value, icon: Icon, icon
     </Card>
   );
 
-  if (tooltipText) {
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>{cardContent}</TooltipTrigger>
-          <TooltipContent>
-            <p className="max-w-xs">{tooltipText}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
-  }
+  const wrappedCard = tooltipText ? (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>{cardContent}</TooltipTrigger>
+        <TooltipContent>
+          <p className="max-w-xs">{tooltipText}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  ) : cardContent;
 
-  return cardContent;
+  return <AnimatedCard delay={delay}>{wrappedCard}</AnimatedCard>;
 };

@@ -90,6 +90,7 @@ export const GestaoFornecedoresDashboard = ({ data }: DashboardProps) => {
           value={processedMetrics.totalFornecedores} 
           icon={Handshake} 
           tooltipText="Número de fornecedores únicos com pedidos no período e filtros selecionados."
+          delay={0}
         />
       </div>
 
@@ -103,6 +104,7 @@ export const GestaoFornecedoresDashboard = ({ data }: DashboardProps) => {
           layout="horizontal" 
           barColor="hsl(var(--primary))"
           isCurrency
+          delay={100}
         />
         <BarChart 
           title="Top 10 - Quantidade de Pedidos por Fornecedor" 
@@ -112,6 +114,7 @@ export const GestaoFornecedoresDashboard = ({ data }: DashboardProps) => {
           barKey="value" 
           layout="horizontal" 
           barColor="hsl(var(--primary))"
+          delay={200}
         />
       </div>
       
@@ -125,6 +128,7 @@ export const GestaoFornecedoresDashboard = ({ data }: DashboardProps) => {
             layout="horizontal" 
             barColor="hsl(var(--positive))"
             isPercentage
+            delay={300}
           />
       </div>
     </div>
