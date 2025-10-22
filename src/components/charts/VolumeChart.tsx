@@ -36,7 +36,7 @@ export const VolumeChart: React.FC<VolumeChartProps> = ({ title, data, dataKeyX,
             <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
             <Tooltip
               contentStyle={{
-                backgroundColor: 'hsl(var(--background))',
+                backgroundColor: 'hsl(var(--card))', // Usando o fundo do card para melhor contraste
                 border: '1px solid hsl(var(--border))',
                 color: 'hsl(var(--foreground))',
                 borderRadius: 'var(--radius)'
@@ -44,7 +44,7 @@ export const VolumeChart: React.FC<VolumeChartProps> = ({ title, data, dataKeyX,
             />
             <Legend wrapperStyle={{ fontSize: '12px' }} />
             <Bar dataKey={barKey1} fill="hsl(var(--primary))" name={barKey1} radius={[4, 4, 0, 0]} />
-            <Bar dataKey={barKey2} fill="hsl(var(--secondary))" name={barKey2} radius={[4, 4, 0, 0]} />
+            <Bar dataKey={barKey2} fill="hsl(var(--muted))" name={barKey2} radius={[4, 4, 0, 0]} />
           </RechartsBarChart>
         </ResponsiveContainer>
       </CardContent>

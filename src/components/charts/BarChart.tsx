@@ -67,7 +67,7 @@ export const BarChart: React.FC<BarChartProps> = ({ title, data, dataKeyX, dataK
             <Tooltip
               formatter={(value: number) => [formatTooltip(value), barKey]}
               contentStyle={{
-                backgroundColor: 'hsl(var(--background))',
+                backgroundColor: 'hsl(var(--card))',
                 border: '1px solid hsl(var(--border))',
                 color: 'hsl(var(--foreground))',
                 borderRadius: 'var(--radius)'

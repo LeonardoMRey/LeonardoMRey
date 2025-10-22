@@ -32,7 +32,7 @@ export const PieChart: React.FC<PieChartProps> = ({ title, data }) => {
           <RechartsPieChart>
             <Tooltip
               contentStyle={{
-                backgroundColor: 'hsl(var(--background))',
+                backgroundColor: 'hsl(var(--card))',
                 border: '1px solid hsl(var(--border))',
                 color: 'hsl(var(--foreground))',
                 borderRadius: 'var(--radius)'

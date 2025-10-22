@@ -42,7 +42,7 @@ export const ParetoChart: React.FC<ParetoChartProps> = ({ title, data, barKey, l
                 return [formatCurrency(value), 'Valor'];
               }}
               contentStyle={{
-                backgroundColor: 'hsl(var(--background))',
+                backgroundColor: 'hsl(var(--card))',
                 border: '1px solid hsl(var(--border))',
                 color: 'hsl(var(--foreground))',
                 borderRadius: 'var(--radius)'

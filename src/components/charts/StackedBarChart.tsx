@@ -35,7 +35,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({ title, data, d
             <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
             <Tooltip
               contentStyle={{
-                backgroundColor: 'hsl(var(--background))',
+                backgroundColor: 'hsl(var(--card))',
                 border: '1px solid hsl(var(--border))',
                 color: 'hsl(var(--foreground))',
                 borderRadius: 'var(--radius)'

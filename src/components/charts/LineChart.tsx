@@ -36,7 +36,7 @@ export const LineChart: React.FC<LineChartProps> = ({ title, data, dataKeyX, lin
             <Tooltip
               formatter={(value: number) => [`${value.toFixed(1)} dias`, 'Lead Time']}
               contentStyle={{
-                backgroundColor: 'hsl(var(--background))',
+                backgroundColor: 'hsl(var(--card))',
                 border: '1px solid hsl(var(--border))',
                 color: 'hsl(var(--foreground))',
                 borderRadius: 'var(--radius)'
