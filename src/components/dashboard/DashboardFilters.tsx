@@ -34,7 +34,7 @@ export const DashboardFilters = ({
             {dateRange?.from ? (dateRange.to ? (<>{format(dateRange.from, "dd/MM/y", { locale: ptBR })} - {format(dateRange.to, "dd/MM/y", { locale: ptBR })}</>) : (format(dateRange.from, "dd/MM/y", { locale: ptBR }))) : (<span>Período</span>)}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="end">
+        <PopoverContent className={cn("w-auto p-0", "light-theme-popover")} align="end">
           <Calendar initialFocus mode="range" defaultMonth={dateRange?.from} selected={dateRange} onSelect={setDateRange} numberOfMonths={2} locale={ptBR} />
         </PopoverContent>
       </Popover>
@@ -43,7 +43,7 @@ export const DashboardFilters = ({
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Obra" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="light-theme-popover">
           <SelectItem value="all">Todas as Obras</SelectItem>
           {projectOptions.map((opt) => (<SelectItem key={opt} value={opt}>{opt}</SelectItem>))}
         </SelectContent>
@@ -53,7 +53,7 @@ export const DashboardFilters = ({
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Comprador" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="light-theme-popover">
           <SelectItem value="all">Todos os Compradores</SelectItem>
           {buyerOptions.map((opt) => (<SelectItem key={opt} value={opt}>{opt}</SelectItem>))}
         </SelectContent>

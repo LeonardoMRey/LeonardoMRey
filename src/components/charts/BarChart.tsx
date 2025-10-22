@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveContainer, BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { formatCurrency } from '@/utils/data-processing';
+import { cn } from '@/lib/utils';
 
 interface BarChartProps {
   title: string;
@@ -12,14 +13,15 @@ interface BarChartProps {
   barColor?: string;
   isCurrency?: boolean;
   isPercentage?: boolean;
+  className?: string;
 }
 
-export const BarChart: React.FC<BarChartProps> = ({ title, data, dataKeyX, dataKeyY, barKey, layout, barColor = 'hsl(var(--primary))', isCurrency = false, isPercentage = false }) => {
+export const BarChart: React.FC<BarChartProps> = ({ title, data, dataKeyX, dataKeyY, barKey, layout, barColor = 'hsl(var(--primary))', isCurrency = false, isPercentage = false, className }) => {
   const isVertical = layout === 'vertical';
 
   if (!data || data.length === 0) {
     return (
-      <Card className="h-96 flex flex-col">
+      <Card className={cn("h-96 flex flex-col", className)}>
         <CardHeader>
           <CardTitle className="text-base font-medium">{title}</CardTitle>
         </CardHeader>
@@ -43,7 +45,7 @@ export const BarChart: React.FC<BarChartProps> = ({ title, data, dataKeyX, dataK
   };
 
   return (
-    <Card className="h-96 flex flex-col">
+    <Card className={cn("h-96 flex flex-col", className)}>
       <CardHeader>
         <CardTitle className="text-base font-medium">{title}</CardTitle>
       </CardHeader>
@@ -54,7 +56,7 @@ export const BarChart: React.FC<BarChartProps> = ({ title, data, dataKeyX, dataK
             {isVertical ? (
               <>
                 <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={formatTick} />
-                <YAxis dataKey={dataKeyY} type="category" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} width={120} />
+                <YAxis dataKey={dataKeyY} type="category" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} width={250} />
               </>
             ) : (
               <>

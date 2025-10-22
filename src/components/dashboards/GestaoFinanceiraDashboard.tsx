@@ -78,6 +78,7 @@ export const GestaoFinanceiraDashboard = ({ data }: DashboardProps) => {
 
       <div className="grid grid-cols-1 gap-4 md:gap-8">
         <BarChart 
+          className="h-[700px]"
           title="Custo por Grupo de Insumo" 
           data={processedMetrics.gastosGrupoInsumoChartData} 
           dataKeyX="value" 
