@@ -11,7 +11,25 @@ import { User } from "lucide-react";
 import { Footer } from "@/components/layout/Footer";
 
 const DEMANDA_MAPPING: { [key: string]: keyof DemandaConsolidada } = {
-  "Nº da Solicitação": "requestNumber", "Descrição do insumo": "itemDescription", "Situação da solicitação": "requestStatus", "Data da solicitação": "requestDate", "Comprador distribuído": "buyer", "Obra": "project", "Situação autorização do item": "authorizationStatus", "N° do Pedido": "orderNumber", "Fornecedor": "supplier", "Situação do pedido": "orderStatus", "Valor da nota": "invoiceValue", "Previsão de entrega": "deliveryForecast", "Quantidade solicitada": "requestedQuantity", "Quantidade entregue": "deliveredQuantity", "Saldo": "pendingQuantity", "Data do pedido": "orderDate", "Data entrega na obra": "actualDeliveryDate", "Grupo de Insumo": "grupoInsumo", "Status Pagamento": "statusPagamento",
+  "nº da solicitação": "requestNumber",
+  "descrição do insumo": "itemDescription",
+  "situação da solicitação": "requestStatus",
+  "data da solicitação": "requestDate",
+  "comprador distribuído": "buyer",
+  "obra": "project",
+  "situação autorização do item": "authorizationStatus",
+  "n° do pedido": "orderNumber",
+  "fornecedor": "supplier",
+  "situação do pedido": "orderStatus",
+  "valor da nota": "invoiceValue",
+  "previsão de entrega": "deliveryForecast",
+  "quantidade solicitada": "requestedQuantity",
+  "quantidade entregue": "deliveredQuantity",
+  "saldo": "pendingQuantity",
+  "data do pedido": "orderDate",
+  "data entrega na obra": "actualDeliveryDate",
+  "grupo de insumo": "grupoInsumo",
+  "status pagamento": "statusPagamento",
 };
 
 const parseNumber = (value: string | number | undefined): number => {
@@ -37,7 +55,11 @@ const DashboardLayout = () => {
 
   const handleFileUpload = (file: File) => {
     Papa.parse(file, {
-      header: true, skipEmptyLines: true, delimiter: ";", trimHeaders: true,
+      header: true,
+      skipEmptyLines: true,
+      delimiter: ";",
+      trimHeaders: true,
+      transformHeader: header => header.toLowerCase().trim(),
       complete: (results) => {
         if (results.errors.length > 0) { showError(`Erro ao processar o arquivo.`); return; }
         const mappedData = results.data.map((row: any) => {
