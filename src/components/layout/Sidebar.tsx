@@ -39,7 +39,7 @@ export const Sidebar = ({ setPageTitle }: SidebarProps) => {
   return (
     <div className="hidden border-r bg-card md:block">
       <div className="flex h-full max-h-screen flex-col gap-2">
-        <div className="flex h-14 items-center justify-center border-b px-4 lg:h-[60px] lg:px-6">
+        <div className="flex h-14 items-center justify-center border-b px-4 lg:h-[60px] lg:px-6 bg-white">
           <Link to="/" className="flex items-center justify-center font-semibold">
             <img src="/logo.png" alt="Newen Logo" className="h-8 object-contain" />
           </Link>
