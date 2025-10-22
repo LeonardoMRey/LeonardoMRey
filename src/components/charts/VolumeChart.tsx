@@ -36,9 +36,9 @@ export const VolumeChart: React.FC<VolumeChartProps> = ({ title, data, dataKeyX,
             <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
             <Tooltip
               contentStyle={{
-                backgroundColor: 'hsl(var(--card))', // Usando o fundo do card para melhor contraste
+                backgroundColor: 'hsl(var(--card))',
                 border: '1px solid hsl(var(--border))',
-                color: 'hsl(var(--foreground))', // Garantindo que a cor do texto seja foreground
+                color: '#FFFFFF', // Corrigido para branco puro
                 borderRadius: 'var(--radius)'
               }}
             />
