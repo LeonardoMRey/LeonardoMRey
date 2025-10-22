@@ -7,6 +7,7 @@ import { Clock, TrendingUp } from "lucide-react";
 import { calculateLeadTime, parseDateString } from "@/utils/data-processing";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { VolumeChart } from "../charts/VolumeChart";
 
 interface DashboardProps {
   data: DemandaConsolidada[];
@@ -20,12 +21,14 @@ export const DesempenhoOperacionalDashboard = ({ data }: DashboardProps) => {
     let leadTimeExternoDays = 0, leadTimeExternoCount = 0;
     const leadTimePorMes: { [key: string]: { total: number; count: number } } = {};
     const gargalosInternos: { [key: string]: number } = {};
+    const volumePorMes: { [key: string]: { solicitacoes: number; pedidos: number } } = {};
 
     data.forEach(d => {
       const requestDate = parseDateString(d.requestDate);
       const orderDate = parseDateString(d.orderDate);
       const actualDeliveryDate = parseDateString(d.actualDeliveryDate);
       
+      // Cálculo de Lead Time
       const leadTimeTotal = (requestDate && actualDeliveryDate) ? calculateLeadTime(d.requestDate, d.actualDeliveryDate) : null;
       if (leadTimeTotal !== null) {
         leadTimeTotalDays += leadTimeTotal; leadTimeTotalCount++;
@@ -41,14 +44,37 @@ export const DesempenhoOperacionalDashboard = ({ data }: DashboardProps) => {
       const leadTimeExterno = (orderDate && actualDeliveryDate) ? calculateLeadTime(d.orderDate, d.actualDeliveryDate) : null;
       if (leadTimeExterno !== null) { leadTimeExternoDays += leadTimeExterno; leadTimeExternoCount++; }
 
+      // Cálculo de Gargalos Internos
       if (!d.orderNumber && !d.requestStatus?.toLowerCase().includes('cancelada') && d.buyer) {
         gargalosInternos[d.buyer] = (gargalosInternos[d.buyer] || 0) + 1;
       }
+
+      // Cálculo de Volume Mensal
+      if (requestDate) {
+        const monthKey = format(requestDate, "MMM/yy", { locale: ptBR });
+        if (!volumePorMes[monthKey]) volumePorMes[monthKey] = { solicitacoes: 0, pedidos: 0 };
+        volumePorMes[monthKey].solicitacoes++;
+        if (d.orderNumber) {
+          volumePorMes[monthKey].pedidos++;
+        }
+      }
     });
     
+    // Função auxiliar para ordenar meses
+    const sortMonths = (a: { month: string }, b: { month: string }) => {
+      const monthOrder = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+      const dateA = new Date(20 + a.month.slice(-2), monthOrder.indexOf(a.month.slice(0, 3).toLowerCase()));
+      const dateB = new Date(20 + b.month.slice(-2), monthOrder.indexOf(b.month.slice(0, 3).toLowerCase()));
+      return dateA.getTime() - dateB.getTime();
+    };
+
     const leadTimeEvolucaoChartData = Object.entries(leadTimePorMes)
       .map(([month, { total, count }]) => ({ month, "Lead Time Médio": count > 0 ? total / count : 0 }))
-      .sort((a, b) => new Date(20 + a.month.slice(-2), ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'].indexOf(a.month.slice(0, 3).toLowerCase())).getTime() - new Date(20 + b.month.slice(-2), ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'].indexOf(b.month.slice(0, 3).toLowerCase())).getTime());
+      .sort(sortMonths);
+
+    const volumeMensalChartData = Object.entries(volumePorMes)
+      .map(([month, { solicitacoes, pedidos }]) => ({ month, "Solicitações": solicitacoes, "Pedidos": pedidos }))
+      .sort(sortMonths);
 
     return {
       leadTimeTotalMedio: leadTimeTotalCount > 0 ? (leadTimeTotalDays / leadTimeTotalCount).toFixed(1) : 'N/A',
@@ -56,6 +82,7 @@ export const DesempenhoOperacionalDashboard = ({ data }: DashboardProps) => {
       leadTimeExternoMedio: leadTimeExternoCount > 0 ? (leadTimeExternoDays / leadTimeExternoCount).toFixed(1) : 'N/A',
       leadTimeEvolucaoChartData,
       gargalosInternosChartData: Object.entries(gargalosInternos).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value),
+      volumeMensalChartData,
     };
   }, [data]);
 
@@ -82,6 +109,16 @@ export const DesempenhoOperacionalDashboard = ({ data }: DashboardProps) => {
           icon={Clock} 
           iconColorClass="text-warning"
           tooltipText="Tempo médio entre a data do pedido de compra e a entrega efetiva na obra."
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:gap-8">
+        <VolumeChart 
+          title="Volume Mensal de Solicitações e Pedidos" 
+          data={processedMetrics.volumeMensalChartData} 
+          dataKeyX="month" 
+          barKey1="Solicitações"
+          barKey2="Pedidos"
         />
       </div>
 
