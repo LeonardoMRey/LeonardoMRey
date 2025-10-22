@@ -14,7 +14,7 @@ interface ParetoChartProps {
 
 export const ParetoChart: React.FC<ParetoChartProps> = ({ title, data, barKey, lineKey, dataKeyX, delay = 0 }) => {
   const chartContent = (
-    <Card className="h-96 flex flex-col">
+    <Card className="h-96 flex flex-col transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 hover:scale-[1.01]">
       <CardHeader>
         <CardTitle className="text-base font-medium">{title}</CardTitle>
       </CardHeader>

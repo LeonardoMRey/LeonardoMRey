@@ -22,7 +22,7 @@ export const BarChart: React.FC<BarChartProps> = ({ title, data, dataKeyX, dataK
   const isVertical = layout === 'vertical';
 
   const chartContent = (
-    <Card className={cn("h-96 flex flex-col", className)}>
+    <Card className={cn("h-96 flex flex-col transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 hover:scale-[1.01]", className)}>
       <CardHeader>
         <CardTitle className="text-base font-medium">{title}</CardTitle>
       </CardHeader>
