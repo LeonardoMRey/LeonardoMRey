@@ -79,3 +79,19 @@
 .recharts-tooltip-wrapper * {
   color: #FFFFFF !important;
 }
+
+/* Custom Animation for Fade-in and Slide-up */
+@keyframes fade-in-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-card-entry {
+  animation: fade-in-slide-up 0.5s ease-out forwards;
+}
