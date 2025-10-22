@@ -34,7 +34,7 @@ export const PieChart: React.FC<PieChartProps> = ({ title, data }) => {
               contentStyle={{
                 backgroundColor: 'hsl(var(--card))',
                 border: '1px solid hsl(var(--border))',
-                color: 'hsl(var(--foreground))',
+                color: 'hsl(var(--foreground))', // Mantendo foreground, que é o branco/off-white
                 borderRadius: 'var(--radius)'
               }}
             />

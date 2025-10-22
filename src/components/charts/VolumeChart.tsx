@@ -38,7 +38,7 @@ export const VolumeChart: React.FC<VolumeChartProps> = ({ title, data, dataKeyX,
               contentStyle={{
                 backgroundColor: 'hsl(var(--card))', // Usando o fundo do card para melhor contraste
                 border: '1px solid hsl(var(--border))',
-                color: 'hsl(var(--foreground))',
+                color: 'hsl(var(--foreground))', // Garantindo que a cor do texto seja foreground
                 borderRadius: 'var(--radius)'
               }}
             />
