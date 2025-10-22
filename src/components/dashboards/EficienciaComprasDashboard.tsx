@@ -1,13 +1,12 @@
 import { useMemo } from "react";
 import { DemandaConsolidada } from "@/types/data";
 import { KpiCard } from "../dashboard/KpiCard";
-import { BarChart } from "../charts/BarChart";
 import { PieChart } from "../charts/PieChart";
 import { ParetoChart } from "../charts/ParetoChart";
 import { StackedBarChart } from "../charts/StackedBarChart";
-import { calculateLeadTime, parseDateString } from "@/utils/data-processing";
-import { CheckCheck, PackageCheck, Clock } from "lucide-react";
-import { isBefore, isEqual, getDay } from "date-fns";
+import { parseDateString } from "@/utils/data-processing";
+import { CheckCheck, PackageCheck } from "lucide-react";
+import { isBefore, isEqual } from "date-fns";
 
 interface DashboardProps {
   data: DemandaConsolidada[];
@@ -16,7 +15,7 @@ interface DashboardProps {
 export const EficienciaComprasDashboard = ({ data }: DashboardProps) => {
 
   const processedMetrics = useMemo(() => {
-    let totalPedidosComPrazo = 0, pedidosNoPrazo = 0, pedidosAtrasados = 0;
+    let totalPedidosComPrazo = 0, pedidosNoPrazo = 0;
     let totalSolicitado = 0, totalEntregue = 0;
     const solicitacoesPorStatus: { [key: string]: number } = {};
     const pedidosPorAutorizacao: { [key: string]: { [key: string]: number } } = {};
@@ -28,7 +27,6 @@ export const EficienciaComprasDashboard = ({ data }: DashboardProps) => {
       if (dataEntrega && dataPrevisao) {
         totalPedidosComPrazo++;
         if (isBefore(dataEntrega, dataPrevisao) || isEqual(dataEntrega, dataPrevisao)) pedidosNoPrazo++;
-        else pedidosAtrasados++;
       }
       
       if (d.requestedQuantity > 0) {
@@ -56,15 +54,18 @@ export const EficienciaComprasDashboard = ({ data }: DashboardProps) => {
     const authStatusSet = new Set(data.map(d => d.authorizationStatus).filter(Boolean));
     const pedidosAutorizacaoChartData = Object.entries(pedidosPorAutorizacao).map(([name, statuses]) => ({ name, ...statuses }));
 
-    const totalValorInsumos = Object.values(valorPorInsumo).reduce((sum, val) => sum + val, 0);
-    let cumulativeValue = 0;
-    const curvaABCChartData = Object.entries(valorPorInsumo)
+    const allSortedInsumos = Object.entries(valorPorInsumo)
       .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value)
-      .map(item => {
-        cumulativeValue += item.value;
-        return { ...item, cumulativePercent: (cumulativeValue / totalValorInsumos) * 100 };
-      });
+      .sort((a, b) => b.value - a.value);
+
+    const totalValorInsumos = allSortedInsumos.reduce((sum, item) => sum + item.value, 0);
+    let cumulativeValue = 0;
+    const allInsumosWithCumulative = allSortedInsumos.map(item => {
+      cumulativeValue += item.value;
+      return { ...item, cumulativePercent: (cumulativeValue / totalValorInsumos) * 100 };
+    });
+
+    const curvaABCChartData = allInsumosWithCumulative.slice(0, 20);
 
     return {
       otdPercent,

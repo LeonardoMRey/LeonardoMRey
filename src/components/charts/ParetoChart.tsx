@@ -11,6 +11,19 @@ interface ParetoChartProps {
 }
 
 export const ParetoChart: React.FC<ParetoChartProps> = ({ title, data, barKey, lineKey, dataKeyX }) => {
+  if (!data || data.length === 0) {
+    return (
+      <Card className="h-96 flex flex-col">
+        <CardHeader>
+          <CardTitle className="text-base font-medium">{title}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex-grow flex items-center justify-center">
+          <p className="text-muted-foreground">Não há dados para exibir.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="h-96 flex flex-col">
       <CardHeader>

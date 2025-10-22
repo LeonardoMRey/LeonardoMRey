@@ -17,6 +17,19 @@ interface BarChartProps {
 export const BarChart: React.FC<BarChartProps> = ({ title, data, dataKeyX, dataKeyY, barKey, layout, barColor = 'hsl(var(--primary))', isCurrency = false, isPercentage = false }) => {
   const isVertical = layout === 'vertical';
 
+  if (!data || data.length === 0) {
+    return (
+      <Card className="h-96 flex flex-col">
+        <CardHeader>
+          <CardTitle className="text-base font-medium">{title}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex-grow flex items-center justify-center">
+          <p className="text-muted-foreground">Não há dados para exibir.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const formatTick = (value: any) => {
     if (isCurrency) return formatCurrency(value as number);
     if (isPercentage) return `${(value as number).toFixed(0)}%`;

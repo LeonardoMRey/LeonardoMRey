@@ -9,6 +9,19 @@ interface PieChartProps {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF4560'];
 
 export const PieChart: React.FC<PieChartProps> = ({ title, data }) => {
+  if (!data || data.length === 0) {
+    return (
+      <Card className="h-96 flex flex-col">
+        <CardHeader>
+          <CardTitle className="text-base font-medium">{title}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex-grow flex items-center justify-center">
+          <p className="text-muted-foreground">Não há dados para exibir.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="h-96 flex flex-col">
       <CardHeader>
