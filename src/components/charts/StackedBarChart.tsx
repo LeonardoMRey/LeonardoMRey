@@ -12,7 +12,7 @@ interface StackedBarChartProps {
 
 export const StackedBarChart: React.FC<StackedBarChartProps> = ({ title, data, dataKeyX, bars, delay = 0 }) => {
   const chartContent = (
-    <Card className="h-96 flex flex-col transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 hover:scale-[1.01]">
+    <Card className="h-96 flex flex-col transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.01] hover:ring-2 hover:ring-primary/50">
       <CardHeader>
         <CardTitle className="text-base font-medium">{title}</CardTitle>
       </CardHeader>

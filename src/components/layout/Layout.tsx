@@ -87,7 +87,7 @@ const DashboardLayout = () => {
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <Sidebar setPageTitle={setPageTitle} />
-      <div className="flex flex-col">
+      <div className="flex flex-col bg-gradient-to-br from-background to-gray-900/50">
         <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6">
           <div className="w-full flex-1">
              <h1 className="text-lg font-semibold md:text-2xl">{pageTitle}</h1>
