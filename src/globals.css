@@ -74,3 +74,8 @@
     --ring: 222.2 84% 4.9%;
   }
 }
+
+/* Forcing Recharts Tooltip text color to white for dark theme contrast */
+.recharts-tooltip-wrapper * {
+  color: #FFFFFF !important;
+}
