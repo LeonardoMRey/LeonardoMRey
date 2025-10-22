@@ -4,7 +4,6 @@ export interface DemandaConsolidada {
   requestStatus: string; // Situação da solicitação
   requestDate: string; // Data da solicitação
   
-  // Usaremos 'buyer' como Comprador e Solicitante (proxy)
   buyer: string; // Comprador distribuído
   
   project: string; // Obra
@@ -22,4 +21,8 @@ export interface DemandaConsolidada {
   
   orderDate?: string; // Data do pedido
   actualDeliveryDate?: string; // Data entrega na obra
+
+  // Novos campos
+  grupoInsumo?: string; // Grupo de Insumo
+  statusPagamento?: string; // Status Pagamento
 }

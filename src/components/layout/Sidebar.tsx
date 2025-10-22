@@ -11,21 +11,25 @@ const sidebarLinks = [
     title: "Desempenho Operacional",
     icon: Activity,
     to: "/desempenho-operacional",
+    activeClass: "bg-blue-900/50 text-blue-300",
   },
   {
     title: "Eficiência de Compras",
     icon: ArrowDownUp,
     to: "/eficiencia-compras",
+    activeClass: "bg-yellow-900/50 text-yellow-300",
   },
   {
     title: "Gestão Financeira",
     icon: Banknote,
     to: "/gestao-financeira",
+    activeClass: "bg-green-900/50 text-green-300",
   },
   {
     title: "Gestão de Fornecedores",
     icon: Handshake,
     to: "/gestao-fornecedores",
+    activeClass: "bg-red-900/50 text-red-300",
   }
 ];
 
@@ -42,14 +46,14 @@ export const Sidebar = ({ setPageTitle }: SidebarProps) => {
         </div>
         <div className="flex-1 py-4">
           <nav className="grid items-start gap-1 px-4 text-sm font-medium">
-            {sidebarLinks.map(({ title, icon: Icon, to }) => (
+            {sidebarLinks.map(({ title, icon: Icon, to, activeClass }) => (
               <Link
                 key={to}
                 to={to}
                 onClick={() => setPageTitle(title)}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-                  location.pathname.includes(to) && "bg-muted text-primary"
+                  location.pathname.includes(to) && activeClass
                 )}
               >
                 <Icon className="h-5 w-5" />

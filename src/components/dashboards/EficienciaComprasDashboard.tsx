@@ -2,8 +2,11 @@ import { useMemo } from "react";
 import { DemandaConsolidada } from "@/types/data";
 import { KpiCard } from "../dashboard/KpiCard";
 import { BarChart } from "../charts/BarChart";
-import { calculateLeadTime, isDateBeforeToday, parseDateString } from "@/utils/data-processing";
-import { CheckCheck, PackageCheck, Clock, CalendarDays } from "lucide-react";
+import { PieChart } from "../charts/PieChart";
+import { ParetoChart } from "../charts/ParetoChart";
+import { StackedBarChart } from "../charts/StackedBarChart";
+import { calculateLeadTime } from "@/utils/data-processing";
+import { CheckCheck, PackageCheck, Clock } from "lucide-react";
 import { isBefore, isEqual, getDay } from "date-fns";
 
 interface DashboardProps {
@@ -13,26 +16,19 @@ interface DashboardProps {
 export const EficienciaComprasDashboard = ({ data }: DashboardProps) => {
 
   const processedMetrics = useMemo(() => {
-    let totalPedidosComPrazo = 0;
-    let pedidosNoPrazo = 0;
-    let pedidosAtrasados = 0;
-    let totalSolicitado = 0;
-    let totalEntregue = 0;
-    const entregaPorFornecedor: { [key: string]: { totalDays: number; count: number } } = {};
-    const solicitacoesPorDia: { [key: number]: number } = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+    let totalPedidosComPrazo = 0, pedidosNoPrazo = 0, pedidosAtrasados = 0;
+    let totalSolicitado = 0, totalEntregue = 0;
+    const solicitacoesPorStatus: { [key: string]: number } = {};
+    const pedidosPorAutorizacao: { [key: string]: { [key: string]: number } } = {};
+    const valorPorInsumo: { [key: string]: number } = {};
 
     data.forEach(d => {
       const dataEntrega = parseDateString(d.actualDeliveryDate);
       const dataPrevisao = parseDateString(d.deliveryForecast);
-      const requestDate = parseDateString(d.requestDate);
-
       if (dataEntrega && dataPrevisao) {
         totalPedidosComPrazo++;
-        if (isBefore(dataEntrega, dataPrevisao) || isEqual(dataEntrega, dataPrevisao)) {
-          pedidosNoPrazo++;
-        } else {
-          pedidosAtrasados++;
-        }
+        if (isBefore(dataEntrega, dataPrevisao) || isEqual(dataEntrega, dataPrevisao)) pedidosNoPrazo++;
+        else pedidosAtrasados++;
       }
       
       if (d.requestedQuantity > 0) {
@@ -40,51 +36,55 @@ export const EficienciaComprasDashboard = ({ data }: DashboardProps) => {
         totalEntregue += d.deliveredQuantity;
       }
 
-      const leadExterno = calculateLeadTime(d.orderDate, d.actualDeliveryDate);
-      if (leadExterno !== null && d.supplier) {
-        if (!entregaPorFornecedor[d.supplier]) {
-          entregaPorFornecedor[d.supplier] = { totalDays: 0, count: 0 };
-        }
-        entregaPorFornecedor[d.supplier].totalDays += leadExterno;
-        entregaPorFornecedor[d.supplier].count++;
+      if (d.requestStatus) solicitacoesPorStatus[d.requestStatus] = (solicitacoesPorStatus[d.requestStatus] || 0) + 1;
+      
+      if (d.project && d.authorizationStatus) {
+        if (!pedidosPorAutorizacao[d.project]) pedidosPorAutorizacao[d.project] = {};
+        pedidosPorAutorizacao[d.project][d.authorizationStatus] = (pedidosPorAutorizacao[d.project][d.authorizationStatus] || 0) + 1;
       }
 
-      if (requestDate) {
-        const diaSemana = getDay(requestDate); // Domingo = 0, Sábado = 6
-        solicitacoesPorDia[diaSemana]++;
+      if (d.itemDescription && d.invoiceValue > 0) {
+        valorPorInsumo[d.itemDescription] = (valorPorInsumo[d.itemDescription] || 0) + d.invoiceValue;
       }
     });
 
     const otdPercent = totalPedidosComPrazo > 0 ? ((pedidosNoPrazo / totalPedidosComPrazo) * 100).toFixed(1) : 'N/A';
-    const atrasoPercent = totalPedidosComPrazo > 0 ? ((pedidosAtrasados / totalPedidosComPrazo) * 100).toFixed(1) : 'N/A';
     const atendimentoPercent = totalSolicitado > 0 ? ((totalEntregue / totalSolicitado) * 100).toFixed(1) : 'N/A';
 
-    const entregaFornecedorChartData = Object.entries(entregaPorFornecedor)
-      .map(([name, { totalDays, count }]) => ({
-        name,
-        value: count > 0 ? totalDays / count : 0,
-      }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 10);
+    const solicitacoesStatusChartData = Object.entries(solicitacoesPorStatus).map(([name, value]) => ({ name, value }));
 
-    const diasDaSemana = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
-    const solicitacoesDiaChartData = Object.entries(solicitacoesPorDia).map(([dia, total]) => ({
-      name: diasDaSemana[parseInt(dia)],
-      value: total,
-    }));
+    const authStatusSet = new Set(data.map(d => d.authorizationStatus).filter(Boolean));
+    const pedidosAutorizacaoChartData = Object.entries(pedidosPorAutorizacao).map(([name, statuses]) => ({ name, ...statuses }));
+
+    const totalValorInsumos = Object.values(valorPorInsumo).reduce((sum, val) => sum + val, 0);
+    let cumulativeValue = 0;
+    const curvaABCChartData = Object.entries(valorPorInsumo)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .map(item => {
+        cumulativeValue += item.value;
+        return { ...item, cumulativePercent: (cumulativeValue / totalValorInsumos) * 100 };
+      });
 
     return {
       otdPercent,
-      atrasoPercent,
       atendimentoPercent,
-      entregaFornecedorChartData,
-      solicitacoesDiaChartData,
+      solicitacoesStatusChartData,
+      pedidosAutorizacaoChartData,
+      authStatusSet: Array.from(authStatusSet),
+      curvaABCChartData,
     };
   }, [data]);
 
+  const authStatusColors = {
+    'Autorizado': 'hsl(var(--positive))',
+    'Pendente': 'hsl(var(--warning))',
+    'Cancelado': 'hsl(var(--destructive))',
+  };
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-2">
         <KpiCard 
           title="OTD - On Time Delivery" 
           value={`${processedMetrics.otdPercent}%`} 
@@ -99,33 +99,25 @@ export const EficienciaComprasDashboard = ({ data }: DashboardProps) => {
           iconColorClass="text-positive"
           tooltipText="Percentual da quantidade total de itens solicitados que foi efetivamente entregue."
         />
-        <KpiCard 
-          title="Pedidos com Atraso" 
-          value={`${processedMetrics.atrasoPercent}%`} 
-          icon={Clock} 
-          iconColorClass="text-destructive"
-          tooltipText="Percentual de pedidos entregues após a data prevista."
-        />
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
-        <BarChart 
-          title="Top 10 - Tempo Médio de Entrega por Fornecedor (dias)" 
-          data={processedMetrics.entregaFornecedorChartData} 
-          dataKeyX="value" 
-          dataKeyY="name" 
-          barKey="value" 
-          layout="vertical" 
-          barColor="hsl(var(--primary))" 
+        <PieChart title="Total de Solicitações por Situação" data={processedMetrics.solicitacoesStatusChartData} />
+        <StackedBarChart 
+          title="Pedidos por Situação de Autorização" 
+          data={processedMetrics.pedidosAutorizacaoChartData} 
+          dataKeyX="name"
+          bars={processedMetrics.authStatusSet.map(status => ({ dataKey: status, name: status, color: authStatusColors[status] || '#8884d8' }))}
         />
-        <BarChart 
-          title="Volume de Solicitações por Dia da Semana" 
-          data={processedMetrics.solicitacoesDiaChartData} 
-          dataKeyX="name" 
-          dataKeyY="value" 
-          barKey="value" 
-          layout="horizontal" 
-          barColor="hsl(var(--primary))" 
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:gap-8">
+        <ParetoChart 
+          title="Curva ABC de Insumos"
+          data={processedMetrics.curvaABCChartData}
+          dataKeyX="name"
+          barKey="value"
+          lineKey="cumulativePercent"
         />
       </div>
     </div>
